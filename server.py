@@ -4,59 +4,170 @@
 # Optional features include auto-generating playlists based upon local weather,
 # news headlines, and the Merriam Webster Word of the Day (or Dictionay.com),
 # whichever API is better
-# # import sys
-# import sqlalchemy
-# from flask import Flask, render_template, redirect, request, flash, session, jinja2
-# from flask_debugtoolbar import DebugToolbarExtension
+
+from flask import Flask, render_template, redirect, request, flash, session, url_for
+from flask_oauthlib.client import OAuth, OAuthException
+from flask_debugtoolbar import DebugToolbarExtension
+import requests
+import os
+import sys
+import subprocess
+import pprint
+from model import connect_to_db
+
 
 app = Flask(__name__)
 app.secret_key = "thisshouldbeunguessable"
+oauth = OAuth(app)
 
-import requests
-import os
-# from pprint import pprint
-# To access our OS environment variables
+printer = pprint.PrettyPrinter()
+
+
 # Use Python os.environ to get environmental variables
 # Note: you must run `source secrets.sh` on terminal before running
 # this file to set required environmental variables.
 
 musixmatch_api_key = os.environ['MUSIXMATCH_API_KEY']
-print musixmatch_api_key
+spotify_client_id = os.environ['SPOTIFY_CLIENT_ID']
+spotify_client_secret = os.environ['SPOTIFY_CLIENT_SECRET']
+
+spotify = oauth.remote_app(
+    'spotify',
+    consumer_key=spotify_client_id,
+    consumer_secret=spotify_client_secret,
+    request_token_params={'scope': 'playlist-modify-public user-read-email user-read-private user-read-birthdate'},
+    base_url='https://accounts.spotify.com/',
+    # request_token_url='https://accounts.spotify.com/api/token',
+    access_token_url='https://accounts.spotify.com/api/token',
+    authorize_url='https://accounts.spotify.com/authorize'
+)
 
 
-@app.route("/", methods = ['GET'])
 def search_for_word_in_lyrics(search_term):
-    """Takes a keyword or words input, and returns a Json object"""
+    """Takes keyword input, and returns a list of spotify track ids
+    for songs with that word or words in the lyrics"""
 
-search_term = request.form.get(search_term)
+    # search_term = request.form.get(search_term)
 
-payload = {'apikey': musixmatch_api_key, 'q_lyrics': search_term, 's_track_rating': 'DESC'}
-# 'q_track': search_term,
-r = requests.get('http://api.musixmatch.com/ws/1.1/track.search', params=payload)
+    payload = {'apikey': musixmatch_api_key, 'q_lyrics': search_term, 'page_size': '100'}
+# s_track_rating: asc or desc
+    r = requests.get('http://api.musixmatch.com/ws/1.1/track.search', params=payload)
+    data = r.json()
 
-print r.json()
+# check to see that the URL has been correctly encoded by printing URL
+# print r.json()
+# print(r.url)
 
-print(r.url)
-# # check to see that the URL has been correctly encoded by printing URL
+    spotify_track_id_list = []
+    track_list = data ['message']['body']['track_list']
 
-# word_songs = r.json()
+    for track in track_list:
+        if track['track']['track_spotify_id']:
+            spotify_track_id_list.append('spotify:track:' + track['track']['track_spotify_id'])
+    return spotify_track_id_list
 
-# num_results = word_songs['resultCount']
+    # future options: make a dictionary with artist name and song title fields to run through genius
+@app.route('/')
+def start_here():
+    """Greet user, introduce the App, and display a button to login to Spotify."""
 
-# for i in range(num_results):
-#     trackName=word_songs['results'][i].get('trackName')
-#     artistName=word_songs['results'][i].get('artistName')
-#     # print "track: %s, artist: %s" %(trackName, artistName)
+    return render_template('homepage.html')
+
+
+@app.route('/login')
+def login():
+    callback = url_for(
+        'spotify_authorized',
+        # next=request.args.get('next') or request.referrer or None,
+        next=None,
+        _external=True
+    )
+    print callback
+    return spotify.authorize(callback=callback)
+
+
+@app.route('/login/authorized')
+def spotify_authorized():
+    resp = spotify.authorized_response()
+    if resp is None:
+        return 'Access denied: reason={0} error={1}'.format(
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    if isinstance(resp, OAuthException):
+        return 'xAccess denied: {0}'.format(resp.message)
+
+    session['oauth_token'] = (resp['access_token'], '')
+    me = spotify.get('https://api.spotify.com/v1/me')
+    session['user_id'] = me.data['id']
+    print dir(me)
+    print printer.pprint(me.data)
+    return redirect('/create-playlist')
+
+    # return 'yay for now\n\nLogged in as id={0} name={1} redirect={2}'.format(
+    #     me.data['id'],
+    #     me.data['name'],
+    #     request.args.get('next')
+    # )
+
+
+
+@app.route('/create-playlist', methods=["GET", 'POST'])
+def create_playlist():
+    """Creates a playlist for the user, and returns the playlist_id"""
+    user_id = session['user_id']
+    print user_id
+
+    if request.method == "POST":
+        # the user submitted the form!
+        search_term = request.form.get('search_term')
+        spotify_track_id_list = search_for_word_in_lyrics(search_term)
+        playlist = spotify.post(
+            'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
+            data={'name': 'Muse--' +search_term},
+            format='json')
+        playlist_id = playlist.data['id']
+        print "playlist_id:" playlist_id
+
+        playlist_songs = spotify.post(
+            'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
+            data={'uris': spotify_track_id_list},
+            format='json')
+        print playlist_songs
+        return render_template('player.html', user_id=user_id, playlist_id=playlist_id)
+    else:
+        # just show the form
+        return render_template('player.html', user_id=user_id, playlist_id=None)
+
+
+
+@spotify.tokengetter
+def get_spotify_oauth_token():
+    return session.get('oauth_token')
+
+
+
+
+# def create_playlist_using_word_of_the_day:
+#     """"""
+# GET request to http://api.wordnik.com/v4/words.json/wordOfTheDay?api_key='yourkeyhere'
+# returns the 'word of the day' object in json format
+
+
+# in the future, reference an existing playlist id? e.g., weather factors, word of the day
+# if/else statement - if it exists, link to playlist; else, create it
+# playlist will follow the format 'mymuse-search_term'
 
 # will cache data for word of the day
 # will cache data for weather
 # will store oauth token for users
-# integrate D3 for visualization of other words? artist? genres?
+# if time, create visualization
+    # integrate D3 for visualization of other words? artist? genres?
+    # use musixmatch to display lyrics?
 
-
-# if __name__ == "__main__":
-#     app.debug = True
-#     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-#     DebugToolbarExtension(app)
-#     connect_to_db(app)
-#     app.run()
+if __name__ == "__main__":
+    app.debug = True
+    app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+    DebugToolbarExtension(app)
+    # connect_to_db(app)
+    app.run()

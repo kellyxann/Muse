@@ -1,0 +1,4 @@
+*.pyc
+*secret*
+*env*
+secrets.sh
