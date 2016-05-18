@@ -7,15 +7,15 @@ class User(db.Model):
 
     __tablename__ = 'users'
 
-    user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    email = db.Column(db.String(100), nullable=False)
-    access_token = db.Column(db.String(100), nullable=False)
+    user_table_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.String(75), nullable=False)
+
 
     def __repr__(self):
         """Provide helpful information when printed to the console"""
 
         return "<user_id: %s, email: %s, access_token: %s"\
-            % (self.user_id, self.email, self.access_token)
+            % (self.user_table_id, self.user_id)
 
 ##############################################################################
 # Helper functions

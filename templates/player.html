@@ -2,21 +2,22 @@
 <html>
 
     <head>
-<title>Muse</title>
+        <title>Muse</title>
     </head>
-
 
     <body>
         <form action ='/create-playlist' method="POST">
-        <label>What would you like to hear about? <input type="text" name="search_term">
-        </label>
-        <input type="submit" value="Find me songs with this theme!">
-    </form>
-<!-- Could make an if loop here, when user gets to page, it will display word of the day -->
-    <iframe src="https://embed.spotify.com/?uri=spotify%3Auser%3Aqlmhuge%3Aplaylist%3A6Df19VKaShrdWrAnHinwVO" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
-{% if playlist_id %}
-    <iframe src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
-    {% endif %}
+            <label>What would you like to hear about? <input type="text" name="search_term">
+            </label>
+            <input type="submit" value="Find me songs with this theme!">
+        </form>
+<!-- Could make an if loop here, when user gets to page, it will display some default playlist
+based on some dynamic variable - weather, news headline keywords, etc -->
+        <iframe src="https://embed.spotify.com/?uri=spotify%3Auser%3Aqlmhuge%3Aplaylist%3A6Df19VKaShrdWrAnHinwVO" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+
+        {% if playlist_id %}
+            <iframe src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+        {% endif %}
     </body>
 
 </html>

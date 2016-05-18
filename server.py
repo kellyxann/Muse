@@ -3,25 +3,21 @@
 
 # Optional features include auto-generating playlists based upon local weather,
 # news headlines, and the Merriam Webster Word of the Day (or Dictionay.com),
-# whichever API is better
 
 from flask import Flask, render_template, redirect, request, flash, session, url_for
 from flask_oauthlib.client import OAuth, OAuthException
 from flask_debugtoolbar import DebugToolbarExtension
+from model import connect_to_db
+import subprocess
 import requests
 import os
 import sys
-import subprocess
 import pprint
-from model import connect_to_db
-
+printer = pprint.PrettyPrinter()
 
 app = Flask(__name__)
 app.secret_key = "thisshouldbeunguessable"
 oauth = OAuth(app)
-
-printer = pprint.PrettyPrinter()
-
 
 # Use Python os.environ to get environmental variables
 # Note: you must run `source secrets.sh` on terminal before running
@@ -127,7 +123,7 @@ def create_playlist():
             data={'name': 'Muse--' +search_term},
             format='json')
         playlist_id = playlist.data['id']
-        print "playlist_id:" playlist_id
+        print "playlist_id:" +playlist_id
 
         playlist_songs = spotify.post(
             'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
@@ -144,7 +140,6 @@ def create_playlist():
 @spotify.tokengetter
 def get_spotify_oauth_token():
     return session.get('oauth_token')
-
 
 
 
