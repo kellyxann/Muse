@@ -8,6 +8,7 @@ from flask import Flask, render_template, redirect, request, flash, session, url
 from flask_oauthlib.client import OAuth, OAuthException
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db
+from random import shuffle
 import subprocess
 import requests
 import os
@@ -26,6 +27,7 @@ oauth = OAuth(app)
 musixmatch_api_key = os.environ['MUSIXMATCH_API_KEY']
 spotify_client_id = os.environ['SPOTIFY_CLIENT_ID']
 spotify_client_secret = os.environ['SPOTIFY_CLIENT_SECRET']
+mapbox_api_key = os.environ['MAPBOX_API_KEY']
 
 spotify = oauth.remote_app(
     'spotify',
@@ -78,7 +80,7 @@ def login():
         next=None,
         _external=True
     )
-    print callback
+
     return spotify.authorize(callback=callback)
 
 
@@ -117,7 +119,8 @@ def create_playlist():
     if request.method == "POST":
         # the user submitted the form!
         search_term = request.form.get('search_term')
-        spotify_track_id_list = search_for_word_in_lyrics(search_term)
+        # is this good use of shuffle?
+        spotify_track_id_list = shuffle(search_for_word_in_lyrics(search_term))
         playlist = spotify.post(
             'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
             data={'name': 'Muse--' +search_term},

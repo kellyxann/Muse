@@ -13,11 +13,14 @@
         </form>
 <!-- Could make an if loop here, when user gets to page, it will display some default playlist
 based on some dynamic variable - weather, news headline keywords, etc -->
-        <iframe src="https://embed.spotify.com/?uri=spotify%3Auser%3Aqlmhuge%3Aplaylist%3A6Df19VKaShrdWrAnHinwVO" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+        <iframe src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+
 
         {% if playlist_id %}
             <iframe src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
         {% endif %}
+
+        
     </body>
 
 </html>
