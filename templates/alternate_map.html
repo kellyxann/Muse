@@ -25,38 +25,52 @@
         <div id='map'></div>
 
         <script>
-
-        var user_lat = 40.7886376;
-        var user_long = -122.4136692;
-        var user_timestamp = Date.now();
-
-        getLocation()
-        // $(document).ready(getLocation);
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    user_lat = position.coords.latitude;
-                    user_lon = position.coords.longitude;
-                    user_timestamp = position.timestamp;
-                    console.log('latitude: ' + user_lat);
-                    });
-            } else {
-                console.log("geolocation not found!");
-            };
-            
-        }
-
         L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
+        
+        var user_lat = 37.7886376;
+        var user_long = -122.4136692;
 
         var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
-        .setView([user_lat, user_long], 6);
+            .setView([37.7886376, -122.4136692], 13);
 
         var marker = new L.Marker(new L.LatLng(user_lat, user_long));
         map.addLayer(marker);
 
         console.log(user_lat)
 
+        
+        var user_timestamp = Date.now();
+
+        getLocation();
+
+        // $(document).ready(getLocation);
+        // function updateMarkerLocation(lat, long){
+        //     marker.
+            // change marker variable in 
+            // Meggies' Advice create a hidden span that has the user_lat long,
+// select as needed
+// use dom as notebook that 
+// wrap marker in updateMarkerLocation
+        // }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(getCoordinates);
+            } else {
+                console.log("geolocation not found!");
+            }
+        }
+
+        function getCoordinates(position) {
+            user_lat = position.coords.latitude;
+            user_lon = position.coords.longitude;
+            user_timestamp = position.timestamp;
+            console.log('latitude: ' + user_lat);
+        }
+
+
+
+        
         </script>
     </body>
 </html>

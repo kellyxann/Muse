@@ -9,8 +9,12 @@ from flask_oauthlib.client import OAuth, OAuthException
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db
 from random import shuffle
+from mapbox import Geocoder
+geocoder = Geocoder()
 import subprocess
 import requests
+import mapbox
+import json
 import os
 import sys
 import pprint
@@ -143,6 +147,36 @@ def create_playlist():
 @spotify.tokengetter
 def get_spotify_oauth_token():
     return session.get('oauth_token')
+
+def get_user_location():
+    """Get a user's location based on their IP address"""
+
+        send_url = 'http://freegeoip.net/json'
+        r = requests.get(send_url)
+        j = json.loads(r.text)
+        user_lat = j['latitude']
+        user_lon = j['longitude']
+
+def convert_place_to_coordinates():
+    """Given a place from user, return the longitude and latitude."""
+    
+    response = geocoder.forward('200 queen street')
+    first = response.geojson()['features'][0]
+    first['place_name']
+    # returns '200 Queen St, Saint John, New Brunswick E2L 2X1, Canada' - this is what i'll want to put in the start search bar
+    first['geometry']['coordinates']
+    # returns long, lat as follows: [-66.050985, 45.270093]
+
+https://api.mapbox.com/geocoding/v5/mapbox.places/.json?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token=sk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvZGt2cXY5MDA5MXU3a214OG0yZHN3YSJ9.WT2jodpnX-PNzvk2FlAZUw"
+# if response contains "200 OK" else, flash a message telling them to try again
+# send a get request to:
+    # /geocoding/v5/mapbox.places/{query}.json
+# query = a place name for forward geocoding to return long, latitude
+query parameter - types: 'address, poi, place, postcode, locality, neighborhood, region'
+
+results returned in a carmen geojson format
+feature ids are formatted like {type}.{id}
+check for presence of a value before attempting to use it
 
 
 
