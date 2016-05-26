@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+
+<html>
+    <head>
+        <title>Muse Map</title>
+        <meta charset=utf-8 />
+        <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+        <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
+        <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
+        <!-- bootstrap goes here -->
+
+        <script src='https://code.jquery.com/jquery-1.11.0.min.js'>
+        </script>
+        <style>
+            body { margin:0; padding:0; }
+            #map { position:absolute; top:0; bottom:0; width:75%; }
+        </style>
+    </head>
+
+    <body>
+    
+        <div id='map'></div>
+
+        <script>
+        var user_lat = 40.7886376;
+        var user_long = -122.4136692;
+        var user_timestamp = Date.now();
+        getLocation()
+        // $(document).ready(getLocation);
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    user_lat = position.coords.latitude;
+                    user_lon = position.coords.longitude;
+                    user_timestamp = position.timestamp;
+                    console.log('hello' + user_lat);
+                    L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
+                     var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
+                     .setView([user_lat, user_long], 13);
+                     var marker = new L.Marker(new L.LatLng(user_lat, user_long));
+                     map.addLayer(marker);
+                     console.log('found user!')
+                    });
+            } else {
+                console.log("geolocation not found!");
+                L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
+                 var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
+                 .setView([40.7886376, 122.4136692], 13);
+                 var marker = new L.Marker(new L.LatLng(40.7886376, 122.4136692));
+                 map.addLayer(marker);
+            };
+        }
+ 
+        console.log(user_lat)
+        </script>
+    </body>
+</html>
