@@ -22,49 +22,121 @@
 
     <body>
     
+        <style>
+        .ui-button {
+          background:#3887BE;
+          color:#FFF;
+          display:block;
+          position:absolute;
+          top:50%;left:50%;
+          width:160px;
+          margin:-20px 0 0 -80px;
+          z-index:100;
+          text-align:center;
+          padding:10px;
+          border:1px solid rgba(0,0,0,0.4);
+          border-radius:3px;
+          }
+          .ui-button:hover {
+            background:#3074a4;
+            color:#fff;
+            }
+        </style>
+
         <div id='map'></div>
+        <a href='#' id='geolocate' class='ui-button'>Find me</a>
 
         <script>
+        L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
+  
+        var geolocate = document.getElementById('geolocate');      
+        // var user_lat = 37.7886376;
+        // var user_long = -122.4136692;
+        // var user_timestamp = Date.now();
 
-        var user_lat = 40.7886376;
-        var user_long = -122.4136692;
-        var user_timestamp = Date.now();
+        var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
+            .setView([37.7886376, -122.4136692], 13);
 
-        getLocation()
-        // $(document).ready(getLocation);
+        var myLayer = L.mapbox.featureLayer().addTo(map);
 
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    user_lat = position.coords.latitude;
-                    user_lon = position.coords.longitude;
-                    user_timestamp = position.timestamp;
-                    console.log('hello' + user_lat);
-                    L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
-                     var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
-                     .setView([user_lat, user_long], 6);
-
-                     var marker = new L.Marker(new L.LatLng(user_lat, user_long));
-                     map.addLayer(marker);
-                    });
-            } else {
-                console.log("geolocation not found!");
-                L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
-                 var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
-                 .setView([user_lat, user_long], 6);
-
-                 var marker = new L.Marker(new L.LatLng(user_lat, user_long));
-                 map.addLayer(marker);
-            };
-
-
+// Mapbox's geolocation uses HTML5 geolocation API
+        if (!navigator.geolocation) {
+          geolocate.innerHTML = 'Geolocation is not available';
+        } else {
+          geolocate.onclick = function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            map.locate();
+          };
         }
 
- 
+// Once position is found, zoom and center the map, and add a marker.
+      map.on('locationfound', function(evt) {
+        map.fitBounds(evt.bounds);
+
+        myLayer.setGeoJSON({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [evt.latng.lng, evt.latlng.lat]
+          },
+          properties: {
+            'title': 'Oh hi!',
+            'marker-color': '#ff8888',
+            'marker-symbol': 'star'
+          }
+        });
+// Hide geolocation button
+        geolocate.parentNode.removeChild(geolocate);
+      });
+// If the user chooses not allow their location to be shared, a pin will drop at Hackbright.
+//       map.on('locationerror', function() {
+//                 map.fitBounds([[-121, 36], [-124, 40]]);
+
+//         myLayer.setGeoJSON({
+//           type: 'Feature',
+//           geometry: {
+//             type: 'Point',
+//             coordinates: [-122.4136692, 37.7886376]
+//           },
+//           properties: {
+//             'title': 'Have you ever been to Hackbright?',
+//             'marker-color': '#ff8888',
+//             'marker-symbol': 'star'
+//           }
+//         });
+// // Hide geolocation button
+//         geolocate.parentNode.removeChild(geolocate);
+//       });
 
 
-        console.log(user_lat)
+        // wrap marker in updateMarkerLocation
+        // var marker = new L.Marker(new L.LatLng(user_lat, user_long));
+        // map.addLayer(marker);
+        // function updateMarkerLocation(lat, long){
+        //     marker.
+        // }
+            // change marker variable in 
+            // Meggies' Advice: create a hidden span that uses the dom as a notebook that has the user_lat long, select as needed. 
 
+        // function getLocation() {
+        //     if (navigator.geolocation) {
+        //         navigator.geolocation.getCurrentPosition(getCoordinates);
+        //     } else {
+        //         console.log("geolocation not found!");
+        //     }
+        // }
+
+        // function getCoordinates(position) {
+        //     user_lat = position.coords.latitude;
+        //     user_lon = position.coords.longitude;
+        //     user_timestamp = position.timestamp;
+        //     console.log('latitude: ' + user_lat);
+        // }
+
+
+
+        
         </script>
     </body>
 </html>
