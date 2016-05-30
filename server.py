@@ -4,6 +4,16 @@
 # Optional features include auto-generating playlists based upon local weather,
 # news headlines, and the Merriam Webster Word of the Day (or Dictionay.com),
 
+# in the future, reference an existing playlist id? e.g., weather factors, word of the day
+# if/else statement - if it exists, link to playlist; else, create it
+# playlist will follow the format 'mymuse-search_term'
+
+# will cache data for word of the day
+# will cache data for weather
+# if time, create visualization
+    # integrate D3 for visualization of other words? artist? genres?
+    # use musixmatch to display lyrics?
+    
 from flask import Flask, render_template, redirect, request, flash, session, url_for
 from flask_oauthlib.client import OAuth, OAuthException
 from flask_debugtoolbar import DebugToolbarExtension
@@ -68,7 +78,7 @@ def search_for_word_in_lyrics(search_term):
             spotify_track_id_list.append('spotify:track:' + track['track']['track_spotify_id'])
     return spotify_track_id_list
 
-    # future options: make a dictionary with artist name and song title fields to run through genius
+
 @app.route('/')
 def start_here():
     """Greet user, introduce the App, and display a button to login to Spotify."""
@@ -106,13 +116,6 @@ def spotify_authorized():
     print printer.pprint(me.data)
     return redirect('/create-playlist')
 
-    # return 'yay for now\n\nLogged in as id={0} name={1} redirect={2}'.format(
-    #     me.data['id'],
-    #     me.data['name'],
-    #     request.args.get('next')
-    # )
-
-
 
 @app.route('/create-playlist', methods=["GET", 'POST'])
 def create_playlist():
@@ -123,7 +126,6 @@ def create_playlist():
     if request.method == "POST":
         # the user submitted the form!
         search_term = request.form.get('search_term')
-        # is this good use of shuffle?
         spotify_track_id_list = shuffle(search_for_word_in_lyrics(search_term))
         playlist = spotify.post(
             'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
@@ -141,8 +143,6 @@ def create_playlist():
     else:
         # just show the form
         return render_template('player.html', user_id=user_id, playlist_id=None)
-
-
 
 @spotify.tokengetter
 def get_spotify_oauth_token():
@@ -184,18 +184,6 @@ check for presence of a value before attempting to use it
 #     """"""
 # GET request to http://api.wordnik.com/v4/words.json/wordOfTheDay?api_key='yourkeyhere'
 # returns the 'word of the day' object in json format
-
-
-# in the future, reference an existing playlist id? e.g., weather factors, word of the day
-# if/else statement - if it exists, link to playlist; else, create it
-# playlist will follow the format 'mymuse-search_term'
-
-# will cache data for word of the day
-# will cache data for weather
-# will store oauth token for users
-# if time, create visualization
-    # integrate D3 for visualization of other words? artist? genres?
-    # use musixmatch to display lyrics?
 
 if __name__ == "__main__":
     app.debug = True

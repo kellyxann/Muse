@@ -16,123 +16,140 @@
         </script>
         <style>
             body { margin:0; padding:0; }
-            #map { position:absolute; top:0; bottom:0; width:75%; }
+            #map { position:absolute; top:25%; bottom:0; width:75%; }
         </style>
     </head>
 
     <body>
-    
-        <style>
-        .ui-button {
-          background:#3887BE;
-          color:#FFF;
-          display:block;
-          position:absolute;
-          top:50%;left:50%;
-          width:160px;
-          margin:-20px 0 0 -80px;
-          z-index:100;
-          text-align:center;
-          padding:10px;
-          border:1px solid rgba(0,0,0,0.4);
-          border-radius:3px;
-          }
-          .ui-button:hover {
-            background:#3074a4;
-            color:#fff;
-            }
-        </style>
+        <form action ='/create-playlist' method="POST">
+            <label><p>Where from?<input type="text" id="origin" placeholder="My current location">
+            <a href="#" name="current_loc_playlist" data-toggle="tooltip" title="Make me a playlist based on my current location!">music-button</a>
+            </label></p>
+            <!-- when the user is done typing, geocoder submission shold happen to show the place on map -->
+            <label><p>Where to?<input type="text" id="destination">
+            </label></p>
+
+            <a href="#" class="routing-btn" data-toggle="walk-tooltip" routing="walking" title="Make me a playlist based on a walk!">walk-button</a>
+            <a href="#" class="routing-btn" data-toggle="bike-tooltip" routing="cycling" title="Make me a playlist based on a bikeride!">bike-button</a>
+            <a href="#" class="routing-btn" data-toggle="drive-tooltip" data-routing="driving"title="Make me a playlist based on a drive!">drive-button</a>
+
+
+            <!-- when one of these buttons is clicked, the map animates
+            playlist replaces this div
+            message flashes 'playlist added to your spotify account. enjoy the soundtrack for your journey!'
+            small button should appear 'make another!' that will return this div -->
+            
+        </form>
+
+
 
         <div id='map'></div>
-        <a href='#' id='geolocate' class='ui-button'>Find me</a>
 
         <script>
         L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
-  
-        var geolocate = document.getElementById('geolocate');      
-        // var user_lat = 37.7886376;
-        // var user_long = -122.4136692;
-        // var user_timestamp = Date.now();
+
+        var user_lat = 37.788681;
+        var user_long = -122.411552;
+        var user_timestamp = Date.now();
+
+        getLocation();
 
         var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
-            .setView([37.7886376, -122.4136692], 13);
+            .setView([user_lat, user_long], 13);
 
-        var myLayer = L.mapbox.featureLayer().addTo(map);
+        var marker = new L.Marker(new L.LatLng(user_lat, user_long));
+        map.addLayer(marker);
 
-// Mapbox's geolocation uses HTML5 geolocation API
-        if (!navigator.geolocation) {
-          geolocate.innerHTML = 'Geolocation is not available';
-        } else {
-          geolocate.onclick = function (evt) {
-            evt.preventDefault();
-            evt.stopPropagation();
-            map.locate();
-          };
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(getCoordinates);
+            } else {
+                console.log("geolocation not found!");
+            }
         }
 
-// Once position is found, zoom and center the map, and add a marker.
-      map.on('locationfound', function(evt) {
-        map.fitBounds(evt.bounds);
+        function getCoordinates(position) {
+            user_lat = position.coords.latitude;
+            user_lon = position.coords.longitude;
+            user_timestamp = position.timestamp;
+        }
 
-        myLayer.setGeoJSON({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [evt.latng.lng, evt.latlng.lat]
-          },
-          properties: {
-            'title': 'Oh hi!',
-            'marker-color': '#ff8888',
-            'marker-symbol': 'star'
-          }
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
         });
-// Hide geolocation button
-        geolocate.parentNode.removeChild(geolocate);
-      });
-// If the user chooses not allow their location to be shared, a pin will drop at Hackbright.
-//       map.on('locationerror', function() {
-//                 map.fitBounds([[-121, 36], [-124, 40]]);
 
-//         myLayer.setGeoJSON({
-//           type: 'Feature',
-//           geometry: {
-//             type: 'Point',
-//             coordinates: [-122.4136692, 37.7886376]
-//           },
-//           properties: {
-//             'title': 'Have you ever been to Hackbright?',
-//             'marker-color': '#ff8888',
-//             'marker-symbol': 'star'
-//           }
-//         });
-// // Hide geolocation button
-//         geolocate.parentNode.removeChild(geolocate);
-//       });
+        var origin = $('#origin').val()
+        var destination = $('#destination').val()
+
+        function makeRoutePlaylist (evt) {
+            $.post('/create-playlist.json'), {'origin': origin, 'destination': destination, 'routing': this.routing}, returnPlaylist);
+        }
+
+        $('.routing-btn').click(makeRoutePlaylist)
 
 
-        // wrap marker in updateMarkerLocation
-        // var marker = new L.Marker(new L.LatLng(user_lat, user_long));
-        // map.addLayer(marker);
-        // function updateMarkerLocation(lat, long){
-        //     marker.
-        // }
-            // change marker variable in 
-            // Meggies' Advice: create a hidden span that uses the dom as a notebook that has the user_lat long, select as needed. 
+        // var geocoder = L.mapbox.geocoder('mapbox.places');
 
-        // function getLocation() {
-        //     if (navigator.geolocation) {
-        //         navigator.geolocation.getCurrentPosition(getCoordinates);
-        //     } else {
-        //         console.log("geolocation not found!");
+        // geocoder.query('current_location_input', showMap);
+
+        // // Geocoder can return an area or a point (like a city or address).
+        // // To handle both cases, the map bounds to an area or zooms to a point
+        // function showMap(err, data) {
+        //     if (data.lbounds) {
+        //         map.fitBounds(data.lbounds);
+        //     } else if (data.latlng) {
+        //         map.setView([data.latlng[0], data.latlng[1]], 13);
         //     }
         // }
 
-        // function getCoordinates(position) {
-        //     user_lat = position.coords.latitude;
-        //     user_lon = position.coords.longitude;
-        //     user_timestamp = position.timestamp;
-        //     console.log('latitude: ' + user_lat);
+
+
+        // Adding a custom Marker
+            // var marker = L.icon({
+            //     iconUrl: 'https://bit.ly/QIMos7',
+            //     iconAnchor: [20, 50]
+            // });
+
+
+        // Adding GeoJSON
+            // L.mapbox.featureLayer()
+            //     .loadURL('/help/data/examples/data.geojson')
+            //     .addTo(map);
+
+
+        // Adding Geocoder
+        // var geocoder = L.mapbox.geocoder('mapbox.places-v1');
+        // geocoder.query('New York City', showMap);
+
+        // function showMap(err, data) {
+        //     if (data.lbounds) {
+        //         map.fitBounds(data.lbounds);
+        //         var marker = L.marker([data.latlng[0], data.latlng[1]]).addTo(map);
+        //     } else if (data.latlng) {
+        //         map.setView([data.latlng[0], data.latlng[1]], 13);
+        //     }
         // }
+
+
+        // Event Handling
+        // map.on('dblclick', function(e) {
+        //     alert(e.latlng);
+        // });
+
+
+
+
+        // $(document).ready(getLocation);
+        // function updateMarkerLocation(lat, long){
+        //     marker.
+            // change marker variable in 
+            // Meggies' Advice create a hidden span that has the user_lat long,
+// select as needed
+// use dom as notebook that 
+// wrap marker in updateMarkerLocation
+        // }
+
+
 
 
 

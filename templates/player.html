@@ -27,11 +27,7 @@ based on some dynamic variable - weather, news headline keywords, etc -->
             <iframe src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
         {% endif %}
 
-        <p>Where from?</p>
-        <p>Use my current location!</p>
 
-        <p>Where to?</p> 
-        Make my trip inspired!
         <style>
 #inputs,
 #errors,
@@ -80,10 +76,7 @@ based on some dynamic variable - weather, news headline keywords, etc -->
   <div id='instructions'></div>
 </div>
 <script>
-L.mapbox.accessToken = os.environ['MAPBOX_API_KEY'];
-var map = L.mapbox.map('map', 'mapbox.streets', {
-    zoomControl: false
-}).setView([40, -74.50], 9);
+
 
 // move the attribution control out of the way
 map.attributionControl.setPosition('bottomleft');

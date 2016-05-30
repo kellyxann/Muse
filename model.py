@@ -20,12 +20,29 @@ class User(db.Model):
             % (self.user_table_id, self.user_id)
 
 class Search(db.Model):
-    """Search history of the user."""
+    """Information for searches"""
 
-    __tablename__ = "searches"
+    __tablename__ = 'searches'
 
     search_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"))
+    user_id = db.Column(db.String(75), db.ForeignKey("users.user_id"))
+    # search_term = I HAVE A VARYING NUMBER OF SEARCH TERMS... 
+
+class UserSearch(db.Model)
+# search table based around search terms
+# association table user search id, user search id, user id search id 
+
+# make a feed to show common searches 
+
+
+
+class Trip(db.Model):
+    """Search history of the user."""
+
+    __tablename__ = "trips"
+
+    trip_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.String(75), db.ForeignKey("users.user_id"))
     origin = db.Column(db.String(200))
     start_lat = db.Column(db.Float)
     start_lng = db.Column(db.Float)
@@ -35,7 +52,7 @@ class Search(db.Model):
     mileage = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.utcnow())
 
-    user = db.relationship('User', backref=db.backref('searches'))
+    user = db.relationship('User', backref=db.backref('trips'))
 
 
     def __repr__(self):
