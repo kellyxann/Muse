@@ -26,13 +26,13 @@ class Search(db.Model):
 
     search_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.String(75), db.ForeignKey("users.user_id"))
-    # search_term = I HAVE A VARYING NUMBER OF SEARCH TERMS... 
+    # search_term = I HAVE A VARYING NUMBER OF SEARCH TERMS...
 
 class UserSearch(db.Model)
 # search table based around search terms
-# association table user search id, user search id, user id search id 
+# association table user search id, user search id, user id search id
 
-# make a feed to show common searches 
+# make a feed to show common searches
 
 
 
@@ -58,7 +58,7 @@ class Trip(db.Model):
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<user_id = %s origin = %s destination = %s mileage = %s date = %s>" % ( 
+        return "<user_id = %s origin = %s destination = %s mileage = %s date = %s>" % (
             self.user_id, self.origin, self.destination, self.mileage, self.date)
 
 ##############################################################################

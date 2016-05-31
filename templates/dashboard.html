@@ -12,8 +12,9 @@
         <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
         <!-- bootstrap goes here -->
 
-        <script src='https://code.jquery.com/jquery-1.11.0.min.js'>
-        </script>
+        <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
         <style>
             body { margin:0; padding:0; }
             #map { position:absolute; top:25%; bottom:0; width:75%; }
@@ -22,16 +23,31 @@
 
     <body>
         <form action ='/create-playlist' method="POST">
+            <label>What would you like to hear about? <input type="text" name="search_term">
+            </label>
+            <input type="submit" value="Find me songs with this theme!">
+        </form>
+
+<!-- Could make an if loop here, when user gets to page, it will display some default playlist
+based on some dynamic variable - weather, news headline keywords, etc -->
+        <iframe src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+
+        {% if playlist_id %}
+            <iframe src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+        {% endif %}
+
+        
+<!--         <form action ='/create-playlist' method="POST"> -->
             <label><p>Where from?<input type="text" id="origin" placeholder="My current location">
-            <a href="#" name="current_loc_playlist" data-toggle="tooltip" title="Make me a playlist based on my current location!">music-button</a>
+            <a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!">music-button</a>
             </label></p>
             <!-- when the user is done typing, geocoder submission shold happen to show the place on map -->
             <label><p>Where to?<input type="text" id="destination">
             </label></p>
 
-            <a href="#" class="routing-btn" data-toggle="walk-tooltip" routing="walking" title="Make me a playlist based on a walk!">walk-button</a>
-            <a href="#" class="routing-btn" data-toggle="bike-tooltip" routing="cycling" title="Make me a playlist based on a bikeride!">bike-button</a>
-            <a href="#" class="routing-btn" data-toggle="drive-tooltip" data-routing="driving"title="Make me a playlist based on a drive!">drive-button</a>
+            <a href="#" class="routing-btn" data-toggle="tooltip" routing="walking" title="Make me a playlist based on a walk!">walk-button </a>
+            <a href="#" class="routing-btn" data-toggle="tooltip" routing="cycling" title="Make me a playlist based on a bikeride!">bike-button </a>
+            <a href="#" class="routing-btn" data-toggle="tooltip" routing="driving"title="Make me a playlist based on a drive!">drive-button </a>
 
 
             <!-- when one of these buttons is clicked, the map animates
@@ -81,8 +97,14 @@
         var origin = $('#origin').val()
         var destination = $('#destination').val()
 
-        function makeRoutePlaylist (evt) {
-            $.post('/create-playlist.json'), {'origin': origin, 'destination': destination, 'routing': this.routing}, returnPlaylist);
+        function makeLocationPlaylist(evt) {
+            $.post('/create-location-playlist.json', {'location': (user_long, user_lat)}, returnPlaylist);
+        }
+
+        $('#location_playlist_btn').click(makeLocationPlaylist)
+
+        function makeRoutePlaylist(evt) {
+            $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': this.routing}, returnPlaylist);
         }
 
         $('.routing-btn').click(makeRoutePlaylist)

@@ -1,19 +1,4 @@
-# Muse is a project that allows a user to generate a Spotify playlist based upon
-# a keyword search of a word or words that appear in the lyrics
 
-# Optional features include auto-generating playlists based upon local weather,
-# news headlines, and the Merriam Webster Word of the Day (or Dictionay.com),
-
-# in the future, reference an existing playlist id? e.g., weather factors, word of the day
-# if/else statement - if it exists, link to playlist; else, create it
-# playlist will follow the format 'mymuse-search_term'
-
-# will cache data for word of the day
-# will cache data for weather
-# if time, create visualization
-    # integrate D3 for visualization of other words? artist? genres?
-    # use musixmatch to display lyrics?
-    
 from flask import Flask, render_template, redirect, request, flash, session, url_for
 from flask_oauthlib.client import OAuth, OAuthException
 from flask_debugtoolbar import DebugToolbarExtension
@@ -51,8 +36,113 @@ spotify = oauth.remote_app(
     base_url='https://accounts.spotify.com/',
     # request_token_url='https://accounts.spotify.com/api/token',
     access_token_url='https://accounts.spotify.com/api/token',
-    authorize_url='https://accounts.spotify.com/authorize'
-)
+    authorize_url='https://accounts.spotify.com/authorize')
+
+
+@app.route('/')
+def start_here():
+    """Greet user, introduce the App, and display a button to login to Spotify."""
+
+    return render_template('homepage.html')
+
+
+@app.route('/login')
+def login():
+    callback = url_for(
+        'spotify_authorized',
+        # next=request.args.get('next') or request.referrer or None,
+        next=None,
+        _external=True)
+    return spotify.authorize(callback=callback)
+
+
+@app.route('/login/authorized')
+def spotify_authorized():
+    resp = spotify.authorized_response()
+    if resp is None:
+        return 'Access denied: reason={0} error={1}'.format(
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    if isinstance(resp, OAuthException):
+        return 'xAccess denied: {0}'.format(resp.message)
+
+    session['oauth_token'] = (resp['access_token'], '')
+    me = spotify.get('https://api.spotify.com/v1/me')
+    session['user_id'] = me.data['id']
+    print dir(me)
+    print printer.pprint(me.data)
+    return redirect('/dashboard.html')
+
+# is dashboard.html where this redirects?
+
+@spotify.tokengetter
+def get_spotify_oauth_token():
+    return session.get('oauth_token')
+
+@app.route('/dashboard')
+def show_dashboard():
+    return render_template('dashboard.html')
+
+
+@app.route('/create-location-playlist', methods=['POST'])
+def create_location_playlist():
+    """Creates a playlist for the user based upon their current location, and returns the playlist_id"""
+    user_id = session['user_id']
+    print user_id
+    location = request.form.get('location')
+
+    location_names = get_location_info(location)
+
+
+
+
+@app.route('/create-journey-playlist', methods=['POST'])
+def create_journey_playlist():
+    """Creates a playlist for the user, and returns the playlist_id"""
+    user_id = session['user_id']
+    print user_id
+    origin, destination, routing = request.form.get('origin', 'destination', 'routing')
+    origin = convert_to_coordinates(origin)
+    destination = convert_to_coordinates(destination)
+
+    coordinates = 
+        if routing == 'walking'
+            GET https://api.mapbox.com/directions/v5/mapbox/walking/{coordinates}
+
+        if routing == 'cycling'
+            GET https://api.mapbox.com/directions/v5/mapbox/cycling/{coordinates}
+
+        if routing == 'driving'
+            GET https://api.mapbox.com/directions/v5/mapbox/driving/{coordinates}
+
+
+@app.route('/create-keyword-playlist', methods=["GET", 'POST'])
+def create_keyword_playlist():
+    """Creates a playlist for the user, and returns the playlist_id"""
+    user_id = session['user_id']
+    print user_id
+
+    if request.method == "POST":
+        # the user submitted the form!
+        search_term = request.form.get('search_term')
+        spotify_track_id_list = shuffle(search_for_word_in_lyrics(search_term))
+        playlist = spotify.post(
+            'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
+            data={'name': 'Muse--' +search_term},
+            format='json')
+        playlist_id = playlist.data['id']
+        print "playlist_id:" +playlist_id
+
+        playlist_songs = spotify.post(
+            'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
+            data={'uris': spotify_track_id_list},
+            format='json')
+        print playlist_songs
+        return render_template('player.html', user_id=user_id, playlist_id=playlist_id)
+    else:
+        # just show the form
+        return render_template('player.html', user_id=user_id, playlist_id=None)
 
 
 def search_for_word_in_lyrics(search_term):
@@ -79,87 +169,15 @@ def search_for_word_in_lyrics(search_term):
     return spotify_track_id_list
 
 
-@app.route('/')
-def start_here():
-    """Greet user, introduce the App, and display a button to login to Spotify."""
-
-    return render_template('homepage.html')
 
 
-@app.route('/login')
-def login():
-    callback = url_for(
-        'spotify_authorized',
-        # next=request.args.get('next') or request.referrer or None,
-        next=None,
-        _external=True
-    )
-
-    return spotify.authorize(callback=callback)
-
-
-@app.route('/login/authorized')
-def spotify_authorized():
-    resp = spotify.authorized_response()
-    if resp is None:
-        return 'Access denied: reason={0} error={1}'.format(
-            request.args['error_reason'],
-            request.args['error_description']
-        )
-    if isinstance(resp, OAuthException):
-        return 'xAccess denied: {0}'.format(resp.message)
-
-    session['oauth_token'] = (resp['access_token'], '')
-    me = spotify.get('https://api.spotify.com/v1/me')
-    session['user_id'] = me.data['id']
-    print dir(me)
-    print printer.pprint(me.data)
-    return redirect('/create-playlist')
-
-
-@app.route('/create-playlist', methods=["GET", 'POST'])
-def create_playlist():
-    """Creates a playlist for the user, and returns the playlist_id"""
-    user_id = session['user_id']
-    print user_id
-
-    if request.method == "POST":
-        # the user submitted the form!
-        search_term = request.form.get('search_term')
-        spotify_track_id_list = shuffle(search_for_word_in_lyrics(search_term))
-        playlist = spotify.post(
-            'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-            data={'name': 'Muse--' +search_term},
-            format='json')
-        playlist_id = playlist.data['id']
-        print "playlist_id:" +playlist_id
-
-        playlist_songs = spotify.post(
-            'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
-            data={'uris': spotify_track_id_list},
-            format='json')
-        print playlist_songs
-        return render_template('player.html', user_id=user_id, playlist_id=playlist_id)
-    else:
-        # just show the form
-        return render_template('player.html', user_id=user_id, playlist_id=None)
-
-@spotify.tokengetter
-def get_spotify_oauth_token():
-    return session.get('oauth_token')
-
-def get_user_location():
-    """Get a user's location based on their IP address"""
-
-        send_url = 'http://freegeoip.net/json'
-        r = requests.get(send_url)
-        j = json.loads(r.text)
-        user_lat = j['latitude']
-        user_lon = j['longitude']
-
-def convert_place_to_coordinates():
+def convert_to_coordinates(place):
     """Given a place from user, return the longitude and latitude."""
-    
+
+    r =requests.get("https://api.mapbox.com/geocoding/v5/mapbox.places/{}.json".format(place))
+    data = r.json()
+
+
     response = geocoder.forward('200 queen street')
     first = response.geojson()['features'][0]
     first['place_name']
@@ -167,7 +185,9 @@ def convert_place_to_coordinates():
     first['geometry']['coordinates']
     # returns long, lat as follows: [-66.050985, 45.270093]
 
-https://api.mapbox.com/geocoding/v5/mapbox.places/.json?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token=sk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvZGt2cXY5MDA5MXU3a214OG0yZHN3YSJ9.WT2jodpnX-PNzvk2FlAZUw"
+def get_location_info(location):
+    """Gets info about user's location to build a playlist"""
+    r = requests.get('https://api.mapbox.com/geocoding/v5/mapbox.places/?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ'
 # if response contains "200 OK" else, flash a message telling them to try again
 # send a get request to:
     # /geocoding/v5/mapbox.places/{query}.json
@@ -179,11 +199,6 @@ feature ids are formatted like {type}.{id}
 check for presence of a value before attempting to use it
 
 
-
-# def create_playlist_using_word_of_the_day:
-#     """"""
-# GET request to http://api.wordnik.com/v4/words.json/wordOfTheDay?api_key='yourkeyhere'
-# returns the 'word of the day' object in json format
 
 if __name__ == "__main__":
     app.debug = True
