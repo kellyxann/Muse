@@ -27,6 +27,7 @@ musixmatch_api_key = os.environ['MUSIXMATCH_API_KEY']
 spotify_client_id = os.environ['SPOTIFY_CLIENT_ID']
 spotify_client_secret = os.environ['SPOTIFY_CLIENT_SECRET']
 mapbox_api_key = os.environ['MAPBOX_API_KEY']
+# mapbox_access_token =
 
 spotify = oauth.remote_app(
     'spotify',
@@ -72,13 +73,13 @@ def spotify_authorized():
     session['user_id'] = me.data['id']
     print dir(me)
     print printer.pprint(me.data)
-    return redirect('/dashboard.html')
+    return redirect('/dashboard')
 
-# is dashboard.html where this redirects?
 
 @spotify.tokengetter
 def get_spotify_oauth_token():
     return session.get('oauth_token')
+
 
 @app.route('/dashboard')
 def show_dashboard():
@@ -89,12 +90,19 @@ def show_dashboard():
 def create_location_playlist():
     """Creates a playlist for the user based upon their current location, and returns the playlist_id"""
     user_id = session['user_id']
-    print user_id
-    location = request.form.get('location')
+    user_long, user_lat, origin = request.form.get('user_long', 'user_lat', 'origin')
+    location_names = ()
 
-    location_names = get_location_info(location)
+    if origin is None:
+        location_names = get_location_info(user_long, user_lat)
+    else:
+        location_names = get_location_info(convert_to_coordinates(origin))
 
+# it's probably best to write this as its own playlist generator function (or to break into classes)
+# playlist will be named based on locality - could do 'street_name, city_name' e.g. Sutter San Francisco
+# or neighborhood, place, region 'downtown san francisco california'
 
+####################### FIXME ####################
 
 
 @app.route('/create-journey-playlist', methods=['POST'])
@@ -104,18 +112,35 @@ def create_journey_playlist():
     print user_id
     origin, destination, routing = request.form.get('origin', 'destination', 'routing')
     origin = convert_to_coordinates(origin)
+    origin_long = origin[0]
+    origin_lat = origin[1]
     destination = convert_to_coordinates(destination)
+    destination_long = destination[0]
+    destination_lat = destination[1]
 
-    coordinates = 
-        if routing == 'walking'
-            GET https://api.mapbox.com/directions/v5/mapbox/walking/{coordinates}
+    r = requests.get('https://api.mapbox.com/directions/v5/mapbox/{}/{},{};{},{}.json?access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ&geometries=geojson&steps=true'.format(routing, origin_long, origin_lat, destination_long, destination_lat))
+    data = {'user_id': user_id, 'playlist_id': playlist_id, 'directions': r}
+    print data
+    return jsonify(data)
 
-        if routing == 'cycling'
-            GET https://api.mapbox.com/directions/v5/mapbox/cycling/{coordinates}
 
-        if routing == 'driving'
-            GET https://api.mapbox.com/directions/v5/mapbox/driving/{coordinates}
+    ####################### FIXME ####################
+# i want to also send this back to my front end to have as a layer on the map
 
+
+# in the query, i think i want steps to be True,
+# if i want to overlay the directions on part of the map
+# geometries - do i want polyline(default) or geojson?
+# overview - do i want full or simplified(default) geometry?
+        # if routing == 'walking':
+
+
+    #     words_to_search = ()
+#             # from response object, pull from
+#             # origin : {}
+#             # destination
+# # write some kind of for loop: for maneuvers in steps, grab value of
+#             # 'steps': [{"maneuver":{"way_name": X}]
 
 @app.route('/create-keyword-playlist', methods=["GET", 'POST'])
 def create_keyword_playlist():
@@ -169,35 +194,28 @@ def search_for_word_in_lyrics(search_term):
     return spotify_track_id_list
 
 
-
-
 def convert_to_coordinates(place):
-    """Given a place from user, return the longitude and latitude."""
+    """Given a place from user, return the [longitude, latitude]."""
 
-    r =requests.get("https://api.mapbox.com/geocoding/v5/mapbox.places/{}.json".format(place))
+    r =requests.get("https://api.mapbox.com/geocoding/v5/mapbox.places/{}.json?autocomplete=true&access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ".format(place))
     data = r.json()
+    coordinates = data['features'][0]['geometry']['coordinates']
+    return coordinates
 
 
-    response = geocoder.forward('200 queen street')
-    first = response.geojson()['features'][0]
-    first['place_name']
-    # returns '200 Queen St, Saint John, New Brunswick E2L 2X1, Canada' - this is what i'll want to put in the start search bar
-    first['geometry']['coordinates']
-    # returns long, lat as follows: [-66.050985, 45.270093]
+# def get_location_info(longitude, latitude):
+#     """Gets info about user's location to build a playlist using reverse geocoding"""
 
-def get_location_info(location):
-    """Gets info about user's location to build a playlist"""
-    r = requests.get('https://api.mapbox.com/geocoding/v5/mapbox.places/?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ'
-# if response contains "200 OK" else, flash a message telling them to try again
-# send a get request to:
-    # /geocoding/v5/mapbox.places/{query}.json
-# query = a place name for forward geocoding to return long, latitude
-query parameter - types: 'address, poi, place, postcode, locality, neighborhood, region'
+#     r = requests.get('https://api.mapbox.com/geocoding/v5/mapbox.places/{}%2C{}.json?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ'.format(longitude, latitude))
+#     data = r.json()
 
-results returned in a carmen geojson format
-feature ids are formatted like {type}.{id}
-check for presence of a value before attempting to use it
+#     contexts = data['features'][0]['context']
 
+#     location_set = set[context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
+
+#     if data[features][0][properties][address]:
+#         street_name = data[features][0][properties][address].split()[1]
+#         location_set.add(street_name)
 
 
 if __name__ == "__main__":

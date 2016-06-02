@@ -18,18 +18,20 @@
         <style>
             body { margin:0; padding:0; }
             #map { position:absolute; top:25%; bottom:0; width:75%; }
+            #directions {position: absolute; width: 25%; max-width: 300px; min-width: 150px;}
+            #directions {z-index: 99; background: rgba(0,0,0,.8); top: 0; right: 0; bottom: 0; overflow: auto;}
         </style>
     </head>
 
     <body>
-        <form action ='/create-playlist' method="POST">
+        <form action ='/create-keyword-playlist' method="POST">
             <label>What would you like to hear about? <input type="text" name="search_term">
             </label>
             <input type="submit" value="Find me songs with this theme!">
         </form>
 
-<!-- Could make an if loop here, when user gets to page, it will display some default playlist
-based on some dynamic variable - weather, news headline keywords, etc -->
+<!-- when user gets to page, it will display some default roadtrip playlist
+that will dynamically change to the playlist that user generates with keyword -->
         <iframe src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
 
         {% if playlist_id %}
@@ -39,6 +41,7 @@ based on some dynamic variable - weather, news headline keywords, etc -->
         
 <!--         <form action ='/create-playlist' method="POST"> -->
             <label><p>Where from?<input type="text" id="origin" placeholder="My current location">
+                <!-- Why won't this let a user type input?! -->
             <a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!">music-button</a>
             </label></p>
             <!-- when the user is done typing, geocoder submission shold happen to show the place on map -->
@@ -73,6 +76,8 @@ based on some dynamic variable - weather, news headline keywords, etc -->
         var map = L.mapbox.map('map', 'kellyann.dcbde2d4')
             .setView([user_lat, user_long], 13);
 
+        var geocoder = L.mapbox.geocoder('mapbox.places');
+
         var marker = new L.Marker(new L.LatLng(user_lat, user_long));
         map.addLayer(marker);
 
@@ -94,23 +99,46 @@ based on some dynamic variable - weather, news headline keywords, etc -->
             $('[data-toggle="tooltip"]').tooltip();
         });
 
+
+        function makeLocationPlaylist(evt) {
+            $.post('/create-location-playlist.json', {'user_long': user_long, 'user_lat': user_lat, 'origin': origin}, returnPlaylist);
+        }
+// want to add directions layer to map
+
         var origin = $('#origin').val()
         var destination = $('#destination').val()
 
-        function makeLocationPlaylist(evt) {
-            $.post('/create-location-playlist.json', {'location': (user_long, user_lat)}, returnPlaylist);
+        var geocoded_origin = userGeocode(origin)
+        var geocoded_dest = userGeocode(destination)
+
+        function userGeocode(inputString) {
+            geocoder.query(inputString, displayResults);
         }
 
         $('#location_playlist_btn').click(makeLocationPlaylist)
 
         function makeRoutePlaylist(evt) {
-            $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': this.routing}, returnPlaylist);
-        }
+            $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': this.routing}, returnPlaylist(data)); 
+                // console.log(data)
+
+            // var myRequest = "https://api.mapbox.com/v4/directions/" + "mapbox." + this.routing"/" + features[1] + ";" + features[0] + ".json?access_token=" + L.mapbox.accessToken;
+            // should be / origin_long, origin_lat; destination_long, destination_lat
+                    // console.log(myRequest);
+                    // $.get(myRequest, function(data){
+                    //     console.log(data);
+
+        function returnPlaylist(data) {
+               var user_id = data.user_id;
+               var playlist_id = data.playlist_id;
+               var directions = data.directions;
+                var firstRoute = L.mapbox.featureLayer(data.routes[0].geometry).addTo(map);
+                        map.fitBounds(firstRoute);
+                    };
+        
 
         $('.routing-btn').click(makeRoutePlaylist)
 
 
-        // var geocoder = L.mapbox.geocoder('mapbox.places');
 
         // geocoder.query('current_location_input', showMap);
 

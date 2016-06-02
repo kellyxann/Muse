@@ -28,7 +28,7 @@ class Search(db.Model):
     user_id = db.Column(db.String(75), db.ForeignKey("users.user_id"))
     # search_term = I HAVE A VARYING NUMBER OF SEARCH TERMS...
 
-class UserSearch(db.Model)
+# class UserSearch(db.Model)
 # search table based around search terms
 # association table user search id, user search id, user id search id
 
