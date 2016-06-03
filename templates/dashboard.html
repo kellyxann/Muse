@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+<!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">  -->
 
 <html>
     <head>
@@ -30,7 +30,7 @@
             <input type="submit" value="Find me songs with this theme!">
         </form>
 
-<!-- when user gets to page, it will display some default roadtrip playlist
+<!-- when user gets to page, it will display a default playlist
 that will dynamically change to the playlist that user generates with keyword -->
         <iframe src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
 
@@ -40,17 +40,19 @@ that will dynamically change to the playlist that user generates with keyword --
 
         
 <!--         <form action ='/create-playlist' method="POST"> -->
-            <label><p>Where from?<input type="text" id="origin" placeholder="My current location">
-                <!-- Why won't this let a user type input?! -->
-            <a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!">music-button</a>
-            </label></p>
+            <label>
+                <p>Where from?<input type="text" id="origin" placeholder="my current location">
+                <a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!">music-button</a>
+            </p>
+            </label>
+
             <!-- when the user is done typing, geocoder submission shold happen to show the place on map -->
             <label><p>Where to?<input type="text" id="destination">
             </label></p>
 
-            <a href="#" class="routing-btn" data-toggle="tooltip" routing="walking" title="Make me a playlist based on a walk!">walk-button </a>
-            <a href="#" class="routing-btn" data-toggle="tooltip" routing="cycling" title="Make me a playlist based on a bikeride!">bike-button </a>
-            <a href="#" class="routing-btn" data-toggle="tooltip" routing="driving"title="Make me a playlist based on a drive!">drive-button </a>
+            <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="walking" title="Make me a playlist based on a walk!">walk-button </a>
+            <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="cycling" title="Make me a playlist based on a bikeride!">bike-button </a>
+            <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="driving" title="Make me a playlist based on a drive!">drive-button </a>
 
 
             <!-- when one of these buttons is clicked, the map animates
@@ -62,7 +64,8 @@ that will dynamically change to the playlist that user generates with keyword --
 
 
 
-        <div id='map'></div>
+        <div id='map' hidden></div>
+        </body>
 
         <script>
         L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
@@ -99,26 +102,32 @@ that will dynamically change to the playlist that user generates with keyword --
             $('[data-toggle="tooltip"]').tooltip();
         });
 
+        var origin = $('#origin').val();
+        var destination = $('#destination').val();
+
+        // var geocoded_origin = userGeocode(origin)
+        // var geocoded_dest = userGeocode(destination)
 
         function makeLocationPlaylist(evt) {
-            $.post('/create-location-playlist.json', {'user_long': user_long, 'user_lat': user_lat, 'origin': origin}, returnPlaylist);
-        }
-// want to add directions layer to map
-
-        var origin = $('#origin').val()
-        var destination = $('#destination').val()
-
-        var geocoded_origin = userGeocode(origin)
-        var geocoded_dest = userGeocode(destination)
-
-        function userGeocode(inputString) {
-            geocoder.query(inputString, displayResults);
+            $.post('/create-location-playlist.json', {'user_long': user_long, 'user_lat': user_lat, 'origin': origin}, returnLocationPlaylist(data));
         }
 
-        $('#location_playlist_btn').click(makeLocationPlaylist)
+        function returnLocationPlaylist(data) {
+                var user_id = data.user_id;
+                var playlist_id = data.playlist_id;
+                // do i want to add a marker on the map, or change the marker?
+            }
+
+
+        // function userGeocode(inputString) {
+        //     geocoder.query(inputString);
+        // }
+
+        $('#location_playlist_btn').click(makeLocationPlaylist);
 
         function makeRoutePlaylist(evt) {
-            $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': this.routing}, returnPlaylist(data)); 
+            $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': $(this).data("routing")}, returnJourneyPlaylist)
+        } 
                 // console.log(data)
 
             // var myRequest = "https://api.mapbox.com/v4/directions/" + "mapbox." + this.routing"/" + features[1] + ";" + features[0] + ".json?access_token=" + L.mapbox.accessToken;
@@ -127,20 +136,23 @@ that will dynamically change to the playlist that user generates with keyword --
                     // $.get(myRequest, function(data){
                     //     console.log(data);
 
-        function returnPlaylist(data) {
+        function returnJourneyPlaylist(data) {
                var user_id = data.user_id;
                var playlist_id = data.playlist_id;
                var directions = data.directions;
                 var firstRoute = L.mapbox.featureLayer(data.routes[0].geometry).addTo(map);
                         map.fitBounds(firstRoute);
-                    };
-        
+        }
+        function waitingForPlaylist () {$('.routing-btn').click(makeRoutePlaylist);
+    };
 
-        $('.routing-btn').click(makeRoutePlaylist)
+        $(document).ready(waitingForPlaylist);
+    // why isn't this attachment of event listener happening?
+
+         </script>
 
 
-
-        // geocoder.query('current_location_input', showMap);
+<!--         // geocoder.query('current_location_input', showMap);
 
         // // Geocoder can return an area or a point (like a city or address).
         // // To handle both cases, the map bounds to an area or zooms to a point
@@ -197,13 +209,12 @@ that will dynamically change to the playlist that user generates with keyword --
 // select as needed
 // use dom as notebook that 
 // wrap marker in updateMarkerLocation
-        // }
+        // } -->
 
 
 
 
 
         
-        </script>
-    </body>
+       
 </html>

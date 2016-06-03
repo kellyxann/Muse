@@ -92,15 +92,34 @@ def create_location_playlist():
     user_id = session['user_id']
     user_long, user_lat, origin = request.form.get('user_long', 'user_lat', 'origin')
     location_names = ()
+    location_track_list = []
 
     if origin is None:
         location_names = get_location_info(user_long, user_lat)
     else:
         location_names = get_location_info(convert_to_coordinates(origin))
 
-# it's probably best to write this as its own playlist generator function (or to break into classes)
-# playlist will be named based on locality - could do 'street_name, city_name' e.g. Sutter San Francisco
-# or neighborhood, place, region 'downtown san francisco california'
+    playlist_name = location_names[-1] + location_names[0]
+    # is this successful concatenation?
+
+    for name in location_names:
+        location_track_list.extend(search_for_word_in_lyrics(name))
+        # is extend what i need here?
+
+        playlist = spotify.post(
+            'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
+            data={'name': 'Muse--' +playlist_name },
+            format='json')
+        playlist_id = playlist.data['id']
+        # print "playlist_id:" +playlist_id
+
+        playlist_songs = spotify.post(
+            'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
+            data={'uris': location_track_list},
+            format='json')
+        # print playlist_songs
+        return render_template('dashboard.html', user_id=user_id, playlist_id=playlist_id)
+
 
 ####################### FIXME ####################
 
@@ -109,82 +128,105 @@ def create_location_playlist():
 def create_journey_playlist():
     """Creates a playlist for the user, and returns the playlist_id"""
     user_id = session['user_id']
-    print user_id
     origin, destination, routing = request.form.get('origin', 'destination', 'routing')
-    origin = convert_to_coordinates(origin)
-    origin_long = origin[0]
-    origin_lat = origin[1]
-    destination = convert_to_coordinates(destination)
-    destination_long = destination[0]
-    destination_lat = destination[1]
+    origin_coordinates = convert_to_coordinates(origin)
+    origin_long = origin_coordinates[0]
+    origin_lat = origin_coordinates[1]
+    destination_coordinates = convert_to_coordinates(destination)
+    destination_long = destination_coordinates[0]
+    destination_lat = destination_coordinates[1]
+
+    waypoint_names = []
+    waypoint_track_ids = []
 
     r = requests.get('https://api.mapbox.com/directions/v5/mapbox/{}/{},{};{},{}.json?access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ&geometries=geojson&steps=true'.format(routing, origin_long, origin_lat, destination_long, destination_lat))
+    response = r.json()
+
+    for waypoint in response['waypoints']:
+        waypoint_names.append(waypoint['name'])
+
+    for step in response['routes'][0]['legs'][0]['steps']:
+        waypoint_names.append(step['name'])
+
+    for item in waypoint_names:
+        waypoint_track_ids.extend(search_for_word_in_lyrics(item))
+        # i think i want extend here, is this correct? 
+
+    playlist = spotify.post(
+        'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
+        data={'name': 'Muse--' + search_term},
+        format='json')
+    # import pdb
+    # pdb.set_trace()
+    playlist_id = playlist.data['id']
+    # print "playlist_id:" +playlist_id
+
+    playlist_songs = spotify.post(
+        'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
+        data={'uris': waypoint_track_ids},
+        format='json')
+    print playlist_songs
+
+    return
+
+
+
     data = {'user_id': user_id, 'playlist_id': playlist_id, 'directions': r}
-    print data
     return jsonify(data)
 
 
     ####################### FIXME ####################
 # i want to also send this back to my front end to have as a layer on the map
-
-
-# in the query, i think i want steps to be True,
-# if i want to overlay the directions on part of the map
-# geometries - do i want polyline(default) or geojson?
-# overview - do i want full or simplified(default) geometry?
-        # if routing == 'walking':
-
-
-    #     words_to_search = ()
+#     words_to_search = ()
 #             # from response object, pull from
 #             # origin : {}
 #             # destination
 # # write some kind of for loop: for maneuvers in steps, grab value of
 #             # 'steps': [{"maneuver":{"way_name": X}]
 
-@app.route('/create-keyword-playlist', methods=["GET", 'POST'])
+@app.route('/create-keyword-playlist', methods=['POST'])
 def create_keyword_playlist():
     """Creates a playlist for the user, and returns the playlist_id"""
+
     user_id = session['user_id']
     print user_id
 
-    if request.method == "POST":
-        # the user submitted the form!
-        search_term = request.form.get('search_term')
-        spotify_track_id_list = shuffle(search_for_word_in_lyrics(search_term))
-        playlist = spotify.post(
-            'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-            data={'name': 'Muse--' +search_term},
-            format='json')
-        playlist_id = playlist.data['id']
-        print "playlist_id:" +playlist_id
+    search_term = request.form.get('search_term')
+    print search_term
+    spotify_track_id_list = search_for_word_in_lyrics(search_term)
+    print spotify_track_id_list
+    playlist = spotify.post(
+        'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
+        data={'name': 'Muse--' + search_term},
+        format='json')
+    # import pdb
+    # pdb.set_trace()
+    playlist_id = playlist.data['id']
+    # print "playlist_id:" +playlist_id
 
-        playlist_songs = spotify.post(
-            'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
-            data={'uris': spotify_track_id_list},
-            format='json')
-        print playlist_songs
-        return render_template('player.html', user_id=user_id, playlist_id=playlist_id)
-    else:
-        # just show the form
-        return render_template('player.html', user_id=user_id, playlist_id=None)
+    playlist_songs = spotify.post(
+        'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
+        data={'uris': spotify_track_id_list},
+        format='json')
+    print playlist_songs
+
+    return render_template('dashboard.html', user_id=user_id, playlist_id=playlist_id)
+
+############################### HELPER FUNCTIONS ##############################
 
 
 def search_for_word_in_lyrics(search_term):
     """Takes keyword input, and returns a list of spotify track ids
     for songs with that word or words in the lyrics"""
 
-    # search_term = request.form.get(search_term)
-
     payload = {'apikey': musixmatch_api_key, 'q_lyrics': search_term, 'page_size': '100'}
-# s_track_rating: asc or desc
+    # s_track_rating: asc or desc
     r = requests.get('http://api.musixmatch.com/ws/1.1/track.search', params=payload)
     data = r.json()
 
-# check to see that the URL has been correctly encoded by printing URL
-# print r.json()
-# print(r.url)
-
+    # check to see that the URL has been correctly encoded by printing URL
+    # print r.json()
+    # print(r.url)
     spotify_track_id_list = []
     track_list = data ['message']['body']['track_list']
 
@@ -203,20 +245,23 @@ def convert_to_coordinates(place):
     return coordinates
 
 
-# def get_location_info(longitude, latitude):
-#     """Gets info about user's location to build a playlist using reverse geocoding"""
+def get_location_info(longitude, latitude):
+    """Gets info about user's location to build a playlist using reverse geocoding"""
 
-#     r = requests.get('https://api.mapbox.com/geocoding/v5/mapbox.places/{}%2C{}.json?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ'.format(longitude, latitude))
-#     data = r.json()
+    r = requests.get('https://api.mapbox.com/geocoding/v5/mapbox.places/{}%2C{}.json?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token=pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ'.format(longitude, latitude))
+    data = r.json()
 
-#     contexts = data['features'][0]['context']
+    contexts = data['features'][0]['context']
 
-#     location_set = set[context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
+    location_list = [context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
 
-#     if data[features][0][properties][address]:
-#         street_name = data[features][0][properties][address].split()[1]
-#         location_set.add(street_name)
+    if data[features][0][properties][address]:
+        street_name = data[features][0][properties][address].split()[1]
+        location_list.append(street_name)
 
+    return location_list
+
+##############################################################################
 
 if __name__ == "__main__":
     app.debug = True
