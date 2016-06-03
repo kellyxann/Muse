@@ -32,11 +32,12 @@
 
 <!-- when user gets to page, it will display a default playlist
 that will dynamically change to the playlist that user generates with keyword -->
-        <iframe src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
 
         {% if playlist_id %}
             <iframe src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
         {% endif %}
+
 
         
 <!--         <form action ='/create-playlist' method="POST"> -->
@@ -102,21 +103,24 @@ that will dynamically change to the playlist that user generates with keyword --
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-        var origin = $('#origin').val();
-        var destination = $('#destination').val();
+        
 
         // var geocoded_origin = userGeocode(origin)
         // var geocoded_dest = userGeocode(destination)
 
         function makeLocationPlaylist(evt) {
-            $.post('/create-location-playlist.json', {'user_long': user_long, 'user_lat': user_lat, 'origin': origin}, returnLocationPlaylist(data));
+            $.post('/create-location-playlist.json', {'user_long': user_long, 'user_lat': user_lat, 'origin': origin}, returnLocationPlaylist);
         }
 
         function returnLocationPlaylist(data) {
-                var user_id = data.user_id;
-                var playlist_id = data.playlist_id;
-                // do i want to add a marker on the map, or change the marker?
-            }
+            var origin = $('#origin').val();
+            var user_id = data.user_id;
+            var playlist_id = data.playlist_id;
+           var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
+           $("#place-playlist").removeAttr('src');
+           $("#place-playlist").attr('src', newsrc);
+            // do i want to add a marker on the map, or change the marker?
+        }
 
 
         // function userGeocode(inputString) {
@@ -126,6 +130,8 @@ that will dynamically change to the playlist that user generates with keyword --
         $('#location_playlist_btn').click(makeLocationPlaylist);
 
         function makeRoutePlaylist(evt) {
+            var origin = $('#origin').val();
+            var destination = $('#destination').val();
             $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': $(this).data("routing")}, returnJourneyPlaylist)
         } 
                 // console.log(data)
@@ -139,15 +145,22 @@ that will dynamically change to the playlist that user generates with keyword --
         function returnJourneyPlaylist(data) {
                var user_id = data.user_id;
                var playlist_id = data.playlist_id;
+               console.log(playlist_id);
+               var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
+               $("#place-playlist").removeAttr('src');
+               $("#place-playlist").attr('src', newsrc);
+
+               // $("#place-playlist").attr('src', "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id+ '"');
+
                var directions = data.directions;
-                var firstRoute = L.mapbox.featureLayer(data.routes[0].geometry).addTo(map);
-                        map.fitBounds(firstRoute);
+                // var firstRoute = L.mapbox.featureLayer(data.routes[0].geometry).addTo(map);
+                //         map.fitBounds(firstRoute);
         }
         function waitingForPlaylist () {$('.routing-btn').click(makeRoutePlaylist);
     };
 
         $(document).ready(waitingForPlaylist);
-    // why isn't this attachment of event listener happening?
+
 
          </script>
 
