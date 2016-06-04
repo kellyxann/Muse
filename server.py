@@ -83,7 +83,9 @@ def get_spotify_oauth_token():
 
 @app.route('/dashboard')
 def show_dashboard():
-    return render_template('dashboard.html')
+    playlist_id = session.get('playlist_id')
+    user_id = session['user_id']
+    return render_template('dashboard.html', playlist_id=playlist_id, user_id=user_id)
 
 
 @app.route('/create-location-playlist.json', methods=['POST'])
@@ -99,7 +101,10 @@ def create_location_playlist():
     if origin is u'':
         location_names = get_location_info(user_long, user_lat)
     else:
-        location_names = get_location_info(convert_to_coordinates(origin))
+        origin_coordinates = convert_to_coordinates(origin)
+        origin_long = origin_coordinates[0]
+        origin_lat = origin_coordinates[1]
+        location_names = get_location_info(origin_long, origin_lat)
 
     playlist_name = location_names[-1] + ' ' + location_names[0]
 
@@ -197,7 +202,9 @@ def create_keyword_playlist():
         data={'uris': spotify_track_id_list},
         format='json')
 
-    return render_template('dashboard.html', user_id=user_id, playlist_id=playlist_id)
+    session['playlist_id'] = playlist_id
+
+    return redirect('/dashboard')
 
 ############################### HELPER FUNCTIONS ##############################
 
@@ -241,9 +248,15 @@ def get_location_info(longitude, latitude):
 
     location_list = [context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
 
-    if data['features'][0]['properties']['address']:
-        street_name = data['features'][0]['properties']['address'].split()[1]
+    print data
+
+    if data['features'][0]['text']:
+        street_name = data['features'][0]['text']
         location_list.append(street_name)
+
+    # if data['features'][0]['properties']['address']:
+    #     street_name = data['features'][0]['properties']['address'].split()[1]
+    #     location_list.append(street_name)
 
     return location_list
 

@@ -32,10 +32,12 @@
 
 <!-- when user gets to page, it will display a default playlist
 that will dynamically change to the playlist that user generates with keyword -->
-        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+        
 
         {% if playlist_id %}
-            <iframe src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+            <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+        {% else %}
+            <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
         {% endif %}
 
 
@@ -71,8 +73,14 @@ that will dynamically change to the playlist that user generates with keyword --
         <script>
         L.mapbox.accessToken = 'pk.eyJ1Ijoia2VsbHlhbm4iLCJhIjoiY2lvYmFqcnNlMDNwbnZ3bHpiZXlsYjVqbiJ9.0-hM3fi1TlEhf7pmXpfsrQ';
 
+        // Hackbright
         var user_lat = 37.788681;
         var user_long = -122.411552;
+
+        // Dogpatch Studios
+        // var user_lat = 37.7598324;
+        // var user_long = -122.391481;
+
         var user_timestamp = Date.now();
 
         getLocation();
@@ -109,11 +117,11 @@ that will dynamically change to the playlist that user generates with keyword --
         // var geocoded_dest = userGeocode(destination)
 
         function makeLocationPlaylist(evt) {
+            var origin = $('#origin').val();
             $.post('/create-location-playlist.json', {'user_long': user_long, 'user_lat': user_lat, 'origin': origin}, returnLocationPlaylist);
         }
 
         function returnLocationPlaylist(data) {
-            var origin = $('#origin').val();
             var user_id = data.user_id;
             var playlist_id = data.playlist_id;
            var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
