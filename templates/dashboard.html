@@ -157,7 +157,9 @@
         function returnJourneyPlaylist(data) {
                var user_id = data.user_id;
                var playlist_id = data.playlist_id;
+               var directions = data.directions;
                console.log(playlist_id);
+               console.log(directions);
                var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
                $("#place-playlist").removeAttr('src');
                $("#place-playlist").attr('src', newsrc);
