@@ -88,6 +88,32 @@ def show_dashboard():
     return render_template('dashboard.html', playlist_id=playlist_id, user_id=user_id)
 
 
+@app.route('/create-keyword-playlist', methods=['POST'])
+def create_keyword_playlist():
+    """Creates a playlist for the user, and returns the playlist_id"""
+
+    user_id = session['user_id']
+    search_term = request.form.get('search_term')
+
+    spotify_track_id_list = search_for_word_in_lyrics(search_term)
+
+    playlist = spotify.post(
+        'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
+        data={'name': 'Muse--' + search_term},
+        format='json')
+
+    playlist_id = playlist.data['id']
+
+    playlist_songs = spotify.post(
+        'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
+        data={'uris': spotify_track_id_list},
+        format='json')
+
+    session['playlist_id'] = playlist_id
+
+    return redirect('/dashboard')
+
+
 @app.route('/create-location-playlist.json', methods=['POST'])
 def create_location_playlist():
     """Creates a playlist for the user based upon their current location, and returns the playlist_id"""
@@ -132,7 +158,6 @@ def create_journey_playlist():
     """Creates a playlist for the user, and returns the playlist_id"""
     user_id = session['user_id']
     origin = request.form.get('origin')
-    print "PRINT ORIGIN:" + origin
     destination = request.form.get('destination')
     routing = request.form.get('routing')
     origin_coordinates = convert_to_coordinates(origin)
@@ -181,30 +206,7 @@ def create_journey_playlist():
 # i want to also send this back to my front end to have as a layer on the map
 
 
-@app.route('/create-keyword-playlist', methods=['POST'])
-def create_keyword_playlist():
-    """Creates a playlist for the user, and returns the playlist_id"""
 
-    user_id = session['user_id']
-    search_term = request.form.get('search_term')
-
-    spotify_track_id_list = search_for_word_in_lyrics(search_term)
-
-    playlist = spotify.post(
-        'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-        data={'name': 'Muse--' + search_term},
-        format='json')
-
-    playlist_id = playlist.data['id']
-
-    playlist_songs = spotify.post(
-        'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
-        data={'uris': spotify_track_id_list},
-        format='json')
-
-    session['playlist_id'] = playlist_id
-
-    return redirect('/dashboard')
 
 ############################### HELPER FUNCTIONS ##############################
 
@@ -225,7 +227,7 @@ def search_for_word_in_lyrics(search_term):
         for track in track_list:
             if track['track']['track_spotify_id']:
                 spotify_track_id_list.append('spotify:track:' + track['track']['track_spotify_id'])
-    print "poop"
+
     return spotify_track_id_list
 
 
@@ -247,8 +249,7 @@ def get_location_info(longitude, latitude):
     contexts = data['features'][0]['context']
 
     location_list = [context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
-
-    print data
+    # print data
 
     if data['features'][0]['text']:
         street_name = data['features'][0]['text']
