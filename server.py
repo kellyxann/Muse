@@ -71,8 +71,8 @@ def spotify_authorized():
     session['oauth_token'] = (resp['access_token'], '')
     me = spotify.get('https://api.spotify.com/v1/me')
     session['user_id'] = me.data['id']
-    print dir(me)
-    print printer.pprint(me.data)
+    # print dir(me)
+    # print printer.pprint(me.data)
     return redirect('/dashboard')
 
 
@@ -251,10 +251,15 @@ def get_location_info(longitude, latitude):
     location_list = [context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
     # print data
 
+# this one works for location playlist
     if data['features'][0]['text']:
         street_name = data['features'][0]['text']
         location_list.append(street_name)
 
+
+# play with printing, if it looks one way, do it this way, if it looks another way, do it another way
+
+# this one works for navigation playlist
     # if data['features'][0]['properties']['address']:
     #     street_name = data['features'][0]['properties']['address'].split()[1]
     #     location_list.append(street_name)

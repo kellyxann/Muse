@@ -81,6 +81,7 @@
         // Hackbright
         var user_lat = 37.788681;
         var user_long = -122.411552;
+        var directions = 'hello';
 
         // Dogpatch Studios
         // var user_lat = 37.7598324;
@@ -157,9 +158,11 @@
         function returnJourneyPlaylist(data) {
                var user_id = data.user_id;
                var playlist_id = data.playlist_id;
-               var directions = data.directions;
+               directions = data.directions;
                console.log(playlist_id);
-               console.log(directions);
+               console.log('these are directions', JSON.stringify(directions.routes[0].geometry, null, 2));
+               var firstRoute = L.mapbox.featureLayer(directions.routes[0].geometry).addTo(map);
+               map.fitBounds(firstRoute);
                var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
                $("#place-playlist").removeAttr('src');
                $("#place-playlist").attr('src', newsrc);
