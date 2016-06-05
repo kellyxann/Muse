@@ -198,7 +198,7 @@ def create_journey_playlist():
         format='json')
     print playlist_songs
 
-    data = {'user_id': user_id, 'playlist_id': playlist_id, 'directions': response}
+    data = {'user_id': user_id, 'playlist_id': playlist_id, 'directions': response, 'origin_lat': origin_lat, 'origin_long': origin_long, 'destination_lat': destination_lat, 'destination_long': destination_long}
     return jsonify(data)
 
 

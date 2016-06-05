@@ -154,12 +154,22 @@
         function returnJourneyPlaylist(data) {
                var user_id = data.user_id;
                var playlist_id = data.playlist_id;
+               var origin_lat = data.origin_lat;
+               var origin_long = data.origin_long;
+               var destination_lat = data.destination_lat;
+               var destination_long = data.destination_long;
                directions = data.directions;
                console.log(playlist_id);
-               console.log('these are directions', JSON.stringify(directions.routes[0].geometry, null, 2));
                route.clearLayers();
                route = L.mapbox.featureLayer(directions.routes[0].geometry).addTo(map);
                map.fitBounds(route);
+               var sample_marker = L.marker([37.7598324, -122.391481]).addTo(map);
+               var origin_marker = L.marker([origin_lat, origin_long]).addTo(map);
+               var destination_marker = L.marker([destination_lat, destination_long]).addTo(map);
+               // var origin_marker = new L.Marker(new L.LatLng(user_lat, user_long));
+               // map.addLayer(origin_marker);
+               // var destination_marker = 
+               // map.addLayer(marker);
                var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
                $("#place-playlist").removeAttr('src');
                $("#place-playlist").attr('src', newsrc);
