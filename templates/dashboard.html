@@ -99,6 +99,8 @@
         var marker = new L.Marker(new L.LatLng(user_lat, user_long));
         map.addLayer(marker);
 
+        var route = L.mapbox.featureLayer();
+
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(getCoordinates);
@@ -148,12 +150,6 @@
             $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': $(this).data("routing")}, returnJourneyPlaylist)
         } 
 
-        // if i want to do directions request on the front end:
-            // var myRequest = "https://api.mapbox.com/v4/directions/" + "mapbox." + $(this).data('routing')"/" + features[1] + ";" + features[0] + ".json?access_token=" + L.mapbox.accessToken;
-            // should be / origin_long, origin_lat; destination_long, destination_lat
-                    // console.log(myRequest);
-                    // $.get(myRequest, function(data){
-                    //     console.log(data);
 
         function returnJourneyPlaylist(data) {
                var user_id = data.user_id;
@@ -161,16 +157,12 @@
                directions = data.directions;
                console.log(playlist_id);
                console.log('these are directions', JSON.stringify(directions.routes[0].geometry, null, 2));
-               var firstRoute = L.mapbox.featureLayer(directions.routes[0].geometry).addTo(map);
-               map.fitBounds(firstRoute);
+               route.clearLayers();
+               route = L.mapbox.featureLayer(directions.routes[0].geometry).addTo(map);
+               map.fitBounds(route);
                var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
                $("#place-playlist").removeAttr('src');
                $("#place-playlist").attr('src', newsrc);
-
-
-               var directions = data.directions;
-                // var firstRoute = L.mapbox.featureLayer(data.routes[0].geometry).addTo(map);
-                //         map.fitBounds(firstRoute);
         }
         function waitingForPlaylist () {$('.routing-btn').click(makeRoutePlaylist);
     };
