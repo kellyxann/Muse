@@ -134,12 +134,14 @@ def create_location_playlist():
 
     playlist_name = location_names[-1] + ' ' + location_names[0]
 
+    print location_names
+
     for name in location_names:
         location_track_list.extend(search_for_word_in_lyrics(name))
 
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-        data={'name': 'Muse--' + playlist_name },
+        data={'name': 'Muse--' + playlist_name.title() },
         format='json')
 
     playlist_id = playlist.data['id']
@@ -189,11 +191,10 @@ def create_journey_playlist():
 
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-        data={'name': routing + ' to ' + destination },
+        data={'name': routing.title() + ' to ' + destination.title() },
         format='json')
 
 # could i change that as routing.title() ?
-# remove duplicates by making waypoint_names a set?
 
     playlist_id = playlist.data['id']
 
