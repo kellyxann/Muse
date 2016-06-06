@@ -185,10 +185,15 @@ def create_journey_playlist():
             count += 1
             waypoint_track_ids.extend(search_for_word_in_lyrics(item))
 
+    print waypoint_names
+
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
         data={'name': routing + ' to ' + destination },
         format='json')
+
+# could i change that as routing.title() ?
+# remove duplicates by making waypoint_names a set?
 
     playlist_id = playlist.data['id']
 
@@ -200,10 +205,6 @@ def create_journey_playlist():
 
     data = {'user_id': user_id, 'playlist_id': playlist_id, 'directions': response, 'origin_lat': origin_lat, 'origin_long': origin_long, 'destination_lat': destination_lat, 'destination_long': destination_long}
     return jsonify(data)
-
-
-    ####################### FIXME ####################
-# i want to also send this back to my front end to have as a layer on the map
 
 
 
@@ -249,7 +250,7 @@ def get_location_info(longitude, latitude):
     contexts = data['features'][0]['context']
 
     location_list = [context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
-    # print data
+    # print location_list
 
 # this one works for location playlist
     if data['features'][0]['text']:

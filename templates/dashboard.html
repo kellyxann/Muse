@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 
-
 <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">  -->
 
 <html>
@@ -16,8 +15,6 @@
         <style>
             body { margin:0; padding:0; }
             #map { height : 500px;}
-/*            #directions {position: absolute; width: 25%; max-width: 300px; min-width: 150px;}
-            #directions {z-index: 99; background: rgba(0,0,0,.8); top: 0; right: 0; bottom: 0; overflow: auto;}*/
         </style>
     </head>
 
@@ -29,7 +26,7 @@
 
         <div class='container'>
             <div class='row'>
-                <div id='place' class='col-sm-3'>
+                <div id='place' class='col-sm-2'>
                 
                     <label>
                         <p>Where from?<input type="text" id="origin" placeholder="my current location">
@@ -37,7 +34,7 @@
                         </p>
                     </label>
 
-                    <!-- when the user is done typing, geocoder submission shold happen to show the place on map -->
+
                     <label><p>Where to?<input type="text" id="destination">
                     </label></p>
 
@@ -45,12 +42,13 @@
                     <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="cycling" title="Make me a playlist based on a bikeride!">bike-button </a>
                     <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="driving" title="Make me a playlist based on a drive!">drive-button </a>
 
-                    <!-- when one of these buttons is clicked, the map animates, playlist changes
-                    message flashes 'playlist added to your spotify account. enjoy the soundtrack for your journey!' -->
+                    <!-- when one of these buttons is clicked, the map animates, playlist changes -->
+                    
+                    <!-- i want to add flash message: 'playlist added to your spotify account. enjoy the soundtrack for your journey!' -->
                     
                 </div>
 
-                <div id='map' class='col-sm-6'>Hi, I'm a map!</div>
+                <div id='map' class='col-sm-7'>Hi, I'm a map!</div>
 
                 <div id= 'keyword' class='col-sm-3'>
                     <form action ='/create-keyword-playlist' method="POST">
@@ -108,19 +106,18 @@
             }
         }
 
+
         function getCoordinates(position) {
             user_lat = position.coords.latitude;
             user_lon = position.coords.longitude;
             user_timestamp = position.timestamp;
         }
 
+
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-
-        // var geocoded_origin = userGeocode(origin)
-        // var geocoded_dest = userGeocode(destination)
 
         function makeLocationPlaylist(evt) {
             var origin = $('#origin').val();
@@ -133,23 +130,17 @@
            var newsrc = "https://embed.spotify.com/?uri=spotify:user:"+ user_id +':playlist:' + playlist_id;
            $("#place-playlist").removeAttr('src');
            $("#place-playlist").attr('src', newsrc);
-            // do i want to add a marker on the map, or change the marker?
         }
-
-
-        // function userGeocode(inputString) {
-        //     geocoder.query(inputString);
-        // }
 
         $('#location_playlist_btn').click(makeLocationPlaylist);
 
-        function makeRoutePlaylist(evt) {
+
+
+        function makeJourneyPlaylist(evt) {
             var origin = $('#origin').val();
             var destination = $('#destination').val();
             $.post('/create-journey-playlist.json', {'origin': origin, 'destination': destination, 'routing': $(this).data("routing")}, returnJourneyPlaylist)
         } 
-
-
 
         function returnJourneyPlaylist(data) {
                var user_id = data.user_id;
@@ -163,7 +154,6 @@
                directions = data.directions;
                console.log(playlist_id);
                route.clearLayers();
-
                route = L.mapbox.featureLayer(directions.routes[0].geometry);
                map.fitBounds(route);
                origin_marker = L.marker([origin_lat, origin_long]).addTo(route);
@@ -173,70 +163,13 @@
                $("#place-playlist").removeAttr('src');
                $("#place-playlist").attr('src', newsrc);
         }
-        function waitingForPlaylist () {$('.routing-btn').click(makeRoutePlaylist);
-    };
+
+        function waitingForPlaylist () {$('.routing-btn').click(makeJourneyPlaylist);
+        };
 
         $(document).ready(waitingForPlaylist);
 
 
          </script>
-
-
-<!--         // geocoder.query('current_location_input', showMap);
-
-        // // Geocoder can return an area or a point (like a city or address).
-        // // To handle both cases, the map bounds to an area or zooms to a point
-        // function showMap(err, data) {
-        //     if (data.lbounds) {
-        //         map.fitBounds(data.lbounds);
-        //     } else if (data.latlng) {
-        //         map.setView([data.latlng[0], data.latlng[1]], 13);
-        //     }
-        // }
-
-
-        // Adding a custom Marker
-            // var marker = L.icon({
-            //     iconUrl: 'https://bit.ly/QIMos7',
-            //     iconAnchor: [20, 50]
-            // });
-
-
-        // Adding GeoJSON
-            // L.mapbox.featureLayer()
-            //     .loadURL('/help/data/examples/data.geojson')
-            //     .addTo(map);
-
-
-        // Adding Geocoder
-        // var geocoder = L.mapbox.geocoder('mapbox.places-v1');
-        // geocoder.query('New York City', showMap);
-
-        // function showMap(err, data) {
-        //     if (data.lbounds) {
-        //         map.fitBounds(data.lbounds);
-        //         var marker = L.marker([data.latlng[0], data.latlng[1]]).addTo(map);
-        //     } else if (data.latlng) {
-        //         map.setView([data.latlng[0], data.latlng[1]], 13);
-        //     }
-        // }
-
-
-        // Event Handling
-        // map.on('dblclick', function(e) {
-        //     alert(e.latlng);
-        // });
-
-
-        // $(document).ready(getLocation);
-        // function updateMarkerLocation(lat, long){
-        //     marker.
-            // change marker variable in 
-            // Meggies' Advice create a hidden span that has the user_lat long,
-// select as needed
-// use dom as notebook that 
-// wrap marker in updateMarkerLocation
-        // } -->
-
        
 </html>
