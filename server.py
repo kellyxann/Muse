@@ -194,8 +194,6 @@ def create_journey_playlist():
         data={'name': routing.title() + ' to ' + destination.title() },
         format='json')
 
-# could i change that as routing.title() ?
-
     playlist_id = playlist.data['id']
 
     playlist_songs = spotify.post(
@@ -251,7 +249,7 @@ def get_location_info(longitude, latitude):
     contexts = data['features'][0]['context']
 
     location_list = [context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
-    # print location_list
+
 
 # this one works for location playlist
     if data['features'][0]['text']:
@@ -259,7 +257,10 @@ def get_location_info(longitude, latitude):
         location_list.append(street_name)
 
 
-# play with printing, if it looks one way, do it this way, if it looks another way, do it another way
+# the response object is inconsistent. write an if/else statement here to cover either case
+# if it looks like this, do it like this, else, do it like this. 
+# play with dictionary default values to not throw errors
+# print data
 
 # this one works for navigation playlist
     # if data['features'][0]['properties']['address']:
