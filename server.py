@@ -134,7 +134,7 @@ def create_location_playlist():
 
     playlist_name = location_names[-1] + ' ' + location_names[0]
 
-    print location_names
+    location_names = set(location_names)
 
     for name in location_names:
         location_track_list.extend(search_for_word_in_lyrics(name))
@@ -181,13 +181,13 @@ def create_journey_playlist():
     for step in response['routes'][0]['legs'][0]['steps']:
         waypoint_names.append(step['name'])
 
+    waypoint_names = set(waypoint_names)
+
     count = 0
     for item in waypoint_names:
         while count < 5:
             count += 1
             waypoint_track_ids.extend(search_for_word_in_lyrics(item))
-
-    print waypoint_names
 
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
@@ -200,7 +200,6 @@ def create_journey_playlist():
         'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
         data={'uris': waypoint_track_ids},
         format='json')
-    print playlist_songs
 
     data = {'user_id': user_id, 'playlist_id': playlist_id, 'directions': response, 'origin_lat': origin_lat, 'origin_long': origin_long, 'destination_lat': destination_lat, 'destination_long': destination_long}
     return jsonify(data)
@@ -245,26 +244,31 @@ def get_location_info(longitude, latitude):
 
     r = requests.get('https://api.mapbox.com/geocoding/v5/mapbox.places/{}%2C{}.json?country=us&types=poi%2Caddress%2Cneighborhood%2Cpostcode%2Cregion%2Clocality%2Cplace%2Ccountry&autocomplete=true&access_token={}'.format(longitude, latitude, mapbox_pub_key))
     data = r.json()
+    # print data
 
     contexts = data['features'][0]['context']
 
     location_list = [context['text'] for context in contexts if context['id'].split('.')[0] in ('neighborhood', 'place', 'region')]
 
-
-# this one works for location playlist
-    if data['features'][0]['text']:
+    if 'text' in data['features'][0]:
         street_name = data['features'][0]['text']
         location_list.append(street_name)
 
+    if 'address' in data['features'][0]['properties']:
+        street_name = data['features'][0]['properties']['address'].split()[1]
+        location_list.append(street_name)
 
-# the response object is inconsistent. write an if/else statement here to cover either case
-# if it looks like this, do it like this, else, do it like this. 
-# play with dictionary default values to not throw errors
-# print data
+# the response object is inconsistent. so the preceding two 'if statements' look for the existence of a key before attempting to use it
+# the below if statements were how they were previously written.
 
-# this one works for navigation playlist
+# usually works for navigation playlist
     # if data['features'][0]['properties']['address']:
     #     street_name = data['features'][0]['properties']['address'].split()[1]
+    #     location_list.append(street_name)
+
+# usually works for location playlist
+    # if data['features'][0]['text']:
+    #     street_name = data['features'][0]['text']
     #     location_list.append(street_name)
 
     return location_list
