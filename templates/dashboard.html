@@ -161,6 +161,7 @@
 
 
         function makeLocationPlaylist(evt) {
+            alert('sending post for location playlist');
             var origin = $('#origin').val();
             $.post('/create-location-playlist.json', {'user_long': user_long, 'user_lat': user_lat, 'origin': origin}, returnLocationPlaylist);
         }

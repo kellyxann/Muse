@@ -99,7 +99,7 @@ def create_keyword_playlist():
 
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-        data={'name': 'Muse--' + search_term.title()},
+        data={'name': 'Muse-' + search_term.title()},
         format='json')
 
     playlist_id = playlist.data['id']
@@ -136,20 +136,23 @@ def create_location_playlist():
 
     location_names = set(location_names)
 
+
     for name in location_names:
         location_track_list.extend(search_for_word_in_lyrics(name))
 
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-        data={'name': 'Muse--' + playlist_name.title()},
+        data={'name': 'Muse-' + playlist_name.title()},
         format='json')
 
     playlist_id = playlist.data['id']
+    import pdb; pdb.set_trace()
 
     playlist_songs = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
         data={'uris': location_track_list},
         format='json')
+    import pdb; pdb.set_trace()
 
     return jsonify({'user_id': user_id, 'playlist_id': playlist_id})
 
@@ -227,7 +230,7 @@ def search_for_word_in_lyrics(search_term):
             if track['track']['track_spotify_id']:
                 spotify_track_id_list.append('spotify:track:' + track['track']['track_spotify_id'])
 
-    return spotify_track_id_list
+    return spotify_track_id_list[:10]
 
 
 def convert_to_coordinates(place):
