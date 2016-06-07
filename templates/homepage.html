@@ -14,22 +14,27 @@
             #intro{font            }
             body { background: url('static/welcome_background.jpeg');
                     background-size: cover; 
-                    font-color: rgba(192,192,192,0.3)}
+                    color: rgba(192,192,192,0.3)}
             .jumbotron {
                 margin-top: 35%;
                 background: rgba(0,0,0,.5); }
+
+            #go {
+                background-color: rgba(0,0,0,.5);
+                opacity: 0.8;
+                border-color: white;
+                color: white;
+            }
         </style>
     </head>
 
     <body>
         <div class='container'>
-<!--             <div class='row'>
- -->                <div class="jumbotron">
-                    <h1 id='name'>A Pirate's Radio</h1>
-                    <p id='intro'>inspired soundtracks for inspired journeys</p>
-                    <p><a class="btn btn-primary-outline btn-lg" href="/login" role="button">Let's go!</a></p>
-<!--                 </div>
- -->            </div>
+            <div class="jumbotron">
+                <h1 id='name'>A Pirate's Radio</h1>
+                <p id='intro'>inspired soundtracks for inspired journeys</p>
+                <p><a id='go' class="btn btn-primary btn-lg-outline" href="/login" role="button">Let's go!</a></p>
+            </div>
         </div>
  
     </body>
