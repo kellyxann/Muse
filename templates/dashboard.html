@@ -8,6 +8,7 @@
         <meta charset=utf-8 />
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Raleway:500' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
         <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
@@ -20,17 +21,26 @@
 
             #title {color: white;}
 
+            #title h3 {color: rgba(255, 255, 255, 0.67);}
+
             #page_name:hover{text-decoration: none;} 
 
             body { margin:0; padding:0; 
-                   background: url('static/lantern.jpg');
-                   background-size: cover; }
+                   background: url('static/floor-1256804.jpg');
+                   background-size: cover; 
+                   font-family: 'Raleway', sans-serif;}
 
             #map { height : 500px;}
 
             .entry { background: rgba(0,0,0,.5); padding-top: 1em;}
 
             .container {color: white;}
+
+            #place {border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;}
+
+            #keyword {border-bottom-right-radius:5px;
+                border-top-right-radius: 5px;}
 
             #keyword form.form-inline {margin-bottom: 1em;}
 
@@ -45,7 +55,7 @@
     <body>
         <div id='title' class='container-fluid'>
             <h1><a href="/" id='page_name'>A Pirate's Radio</a></h1>
-            <h2>inspired soundtracks for inspired journeys</h2>
+            <h3>inspired soundtracks for inspired journeys</h3>
         </div>
 
         <div class='container'>
@@ -56,13 +66,13 @@
                 <div id='place' class='col-xs-12 col-sm-2 col-sm-pull-7 entry' >
                 
                     <label>
-                        <p>Where from?<input type="text" id="origin" placeholder="my current location"></p>
+                        <p>Where are you?<input type="text" id="origin" class="form-control" placeholder="my current location"></p>
                         <p style="float: right"><a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!"><i class="fa fa-globe fa-2x fa-pull-right fa-border" style="color: white;"></i></a>
                         </p>
                     </label>
 
 
-                    <label><p>Where to?<input type="text" id="destination">
+                    <label><p>Where are you going?<input type="text" class="form-control" id="destination">
                     </p></label>
                         <span style ="float: right; margin-bottom: 1em;">
                             <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="walking" title="Make me a playlist based on a walk!"><i class="fa fa-child fa-2x fa-border" style="color: white;"></i></a>
@@ -84,7 +94,7 @@
                         </div>
 
                         <div class="form-group">
-                        <button type="submit" class="form-control" data-toggle='tooltip' title='Make me a playlist with this theme!' style='background-color: transparent; box-shadow: none; border: none; margin-top:0;'><i class="fa fa-music fa-2x fa-border" style="color: white;"></i></button>
+                            <button type="submit" class="form-control" data-toggle='tooltip' title='Make me a playlist with this theme!' style='background-color: transparent; box-shadow: none; border: none; margin-top:0;'><i class="fa fa-music fa-2x fa-border" style="color: white;"></i></button>
                         </div>
                     </form>
 
@@ -110,13 +120,13 @@
         // Hackbright
         var user_lat = 37.788681;
         var user_long = -122.411552;
-        var directions = 'hello';
 
         // Dogpatch Studios
         // var user_lat = 37.7598324;
         // var user_long = -122.391481;
 
         var user_timestamp = Date.now();
+        var directions = 'hello';
 
         getLocation();
 
