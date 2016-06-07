@@ -15,7 +15,7 @@
         <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" >
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
         <style>
-            #page_name { font-family: 'Pacifico', cursive; font-size: 50px;
+            #page_name { font-family: 'Pacifico', cursive; font-size: 63px;
                          color: white; }
 
             body { margin:0; padding:0; 
@@ -24,14 +24,18 @@
 
             #map { height : 500px;}
 
-            .entry { background: rgba(0,0,0,.5); }
+            .entry { background: rgba(0,0,0,.5); padding-top: 1em;}
+
+            .container {color: white;}
+
+            #keyword form.form-inline {margin-bottom: 1em;}
 
         </style>
     </head>
 
     <body>
         <div id='title' class='container-fluid'>
-            <h1 id='page_name'>A Pirate's Radio</h1>
+            <h1 a href="/" style ='color:white;'id='page_name'>A Pirate's Radio</a></h1>
             <h2>Inspired playlists for inspired people</h2>
         </div>
 
@@ -43,18 +47,19 @@
                 <div id='place' class='col-xs-12 col-sm-2 col-sm-pull-7 entry' >
                 
                     <label>
-                        <p>Where from?<input type="text" id="origin" placeholder="my current location">
-                        <a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!"><i class="fa fa-globe fa-2x fa-pull-right fa-border" style="color: white;"></i></a>
+                        <p>Where from?<input type="text" id="origin" placeholder="my current location"></p>
+                        <p style="float: right"><a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!"><i class="fa fa-globe fa-2x fa-pull-right fa-border" style="color: white;"></i></a>
                         </p>
                     </label>
 
 
                     <label><p>Where to?<input type="text" id="destination">
-                    </label></p>
-
-                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="walking" title="Make me a playlist based on a walk!"><i class="fa fa-child fa-2x fa-border" style="color: white;"></i></a>
-                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="cycling" title="Make me a playlist based on a bikeride!"><i class="fa fa-bicycle fa-2x fa-border" style="color: white;"></i></a>
-                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="driving" title="Make me a playlist based on a drive!"><i class="fa fa-car fa-2x fa-border" style="color: white;"></i></a>
+                    </p></label>
+                        <span style ="float: right; margin-bottom: 1em;">
+                            <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="walking" title="Make me a playlist based on a walk!"><i class="fa fa-child fa-2x fa-border" style="color: white;"></i></a>
+                            <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="cycling" title="Make me a playlist based on a bikeride!"><i class="fa fa-bicycle fa-2x fa-border" style="color: white;"></i></a>
+                            <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="driving" title="Make me a playlist based on a drive!"><i class="fa fa-car fa-2x fa-border" style="color: white;"></i></a>
+                        </span>
 
                     <!-- when one of these buttons is clicked, the map animates, playlist changes -->
                     
@@ -63,21 +68,24 @@
                 </div>
 
                 <div id= 'keyword' class='col-xs-12 col-sm-3 entry'>
-                    <form action ='/create-keyword-playlist' method="POST">
-                        <label>Use the Pirate's Muse <input type="text" name="search_term">
-                        </label>
-                        <button type="submit" a href="" data-toggle='tooltip' title='Make me a playlist with this theme!' style='background-color: transparent; box-shadow: none; border: none;'><i class="fa fa-music fa-2x fa-border" style="color: white;"></i></a></button>
+                    <label for="search_term">What's your inspiration? </label>
+                    <form class="form-inline" style="margin-bottom: 1em;" action ='/create-keyword-playlist' method="POST">
+                        <div class="form-group"> 
+                            <input type="text" class="form-control" style="padding-bottom:0" name="search_term">
+                        </div>
+
+                        <div class="form-group">
+                        <button type="submit" class="form-control" data-toggle='tooltip' title='Make me a playlist with this theme!' style='background-color: transparent; box-shadow: none; border: none; margin-top:0;'><i class="fa fa-music fa-2x fa-border" style="color: white;"></i></button>
+                        </div>
                     </form>
-
-
 
                     <!-- when user gets to page, it will display a default playlist
                     that will change to the playlist that user generates -->
 
                     {% if playlist_id %}
-                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="280" height="380" frameborder="0" allowtransparency="true"></iframe>
+                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="270" height="380" frameborder="0" style="float: center; margin-bottom: 1em;" allowtransparency="true"></iframe>
                     {% else %}
-                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="280" height="380" frameborder="0" allowtransparency="true"></iframe>
+                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="270" height="380" frameborder="0" style="float: center; margin-bottom: 1em;" allowtransparency="true"></iframe>
                     {% endif %}
 
                 </div>
