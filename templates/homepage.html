@@ -3,15 +3,34 @@
 
     <head>
         <title>A Pirate's Radio</title>
+        <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+        <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
+        <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" >
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <link href="/static/vendor/jumbotron-narrow.css" rel="stylesheet">
+        <style>
+            #name {font-family: 'Pacifico', cursive;
+                    color: white; }
+            #intro{font            }
+            body { background: url('static/welcome_background.jpeg');
+                    background-size: cover; 
+                    font-color: rgba(192,192,192,0.3)}
+            .jumbotron {
+                margin-top: 35%;
+                background: rgba(0,0,0,.5); }
+        </style>
     </head>
 
     <body>
-        <h2>A Pirate's Radio</h2>
-
-        <h3>inspired soundtracks for inspired journeys</h3>
-        <h3>Let's get started!</h3>
-
-        <a href="/login" button type="button">Log in with Spotify!</button>
+        <div class='container'>
+<!--             <div class='row'>
+ -->                <div class="jumbotron">
+                    <h1 id='name'>A Pirate's Radio</h1>
+                    <p id='intro'>inspired soundtracks for inspired journeys</p>
+                    <p><a class="btn btn-primary-outline btn-lg" href="/login" role="button">Let's get started!</a></p>
+<!--                 </div>
+ -->            </div>
+        </div>
  
     </body>
 

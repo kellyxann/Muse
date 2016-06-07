@@ -7,30 +7,44 @@
         <title>A Pirate's Radio</title>
         <meta charset=utf-8 />
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+        <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
         <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
         <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
         <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
         <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" >
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
         <style>
-            body { margin:0; padding:0; }
+            #page_name { font-family: 'Pacifico', cursive; font-size: 50px;
+                         color: white; }
+
+            body { margin:0; padding:0; 
+                   background: url('static/lantern.jpg');
+                   background-size: cover; }
+
             #map { height : 500px;}
+
+            .entry { background: rgba(0,0,0,.5); }
+
         </style>
     </head>
 
     <body>
         <div id='title' class='container-fluid'>
-            <h1>A Pirate's Radio</h1>
+            <h1 id='page_name'>A Pirate's Radio</h1>
             <h2>Inspired playlists for inspired people</h2>
         </div>
 
         <div class='container'>
             <div class='row'>
-                <div id='place' class='col-sm-2'>
+
+                <div id='map' class='col-xs-12 col-sm-7 col-sm-push-2'>Hi, I'm a map!</div>
+
+                <div id='place' class='col-xs-12 col-sm-2 col-sm-pull-7 entry' >
                 
                     <label>
                         <p>Where from?<input type="text" id="origin" placeholder="my current location">
-                        <a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!">music-button</a>
+                        <a href="#" id="location_playlist_btn" data-toggle="tooltip" title="Make me a playlist based on my current location!"><i class="fa fa-globe fa-2x fa-pull-right fa-border" style="color: white;"></i></a>
                         </p>
                     </label>
 
@@ -38,9 +52,9 @@
                     <label><p>Where to?<input type="text" id="destination">
                     </label></p>
 
-                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="walking" title="Make me a playlist based on a walk!">walk-button </a>
-                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="cycling" title="Make me a playlist based on a bikeride!">bike-button </a>
-                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="driving" title="Make me a playlist based on a drive!">drive-button </a>
+                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="walking" title="Make me a playlist based on a walk!"><i class="fa fa-child fa-2x fa-border" style="color: white;"></i></a>
+                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="cycling" title="Make me a playlist based on a bikeride!"><i class="fa fa-bicycle fa-2x fa-border" style="color: white;"></i></a>
+                    <a href="#" class="routing-btn" data-toggle="tooltip" data-routing="driving" title="Make me a playlist based on a drive!"><i class="fa fa-car fa-2x fa-border" style="color: white;"></i></a>
 
                     <!-- when one of these buttons is clicked, the map animates, playlist changes -->
                     
@@ -48,22 +62,22 @@
                     
                 </div>
 
-                <div id='map' class='col-sm-7'>Hi, I'm a map!</div>
-
-                <div id= 'keyword' class='col-sm-3'>
+                <div id= 'keyword' class='col-xs-12 col-sm-3 entry'>
                     <form action ='/create-keyword-playlist' method="POST">
-                        <label>What would you like to hear about? <input type="text" name="search_term">
+                        <label>Use the Pirate's Muse <input type="text" name="search_term">
                         </label>
-                        <input type="submit" value="Find me songs with this theme!">
+                        <button type="submit" a href="" data-toggle='tooltip' title='Make me a playlist with this theme!' style='background-color: transparent; box-shadow: none; border: none;'><i class="fa fa-music fa-2x fa-border" style="color: white;"></i></a></button>
                     </form>
+
+
 
                     <!-- when user gets to page, it will display a default playlist
                     that will change to the playlist that user generates -->
 
                     {% if playlist_id %}
-                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:{{user_id}}:playlist:{{playlist_id}}" width="280" height="380" frameborder="0" allowtransparency="true"></iframe>
                     {% else %}
-                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+                        <iframe id='place-playlist' src="https://embed.spotify.com/?uri=spotify:user:kellyannhiggins:playlist:25OiILy6Gp0Cg4DuuJ7cKy" width="280" height="380" frameborder="0" allowtransparency="true"></iframe>
                     {% endif %}
 
                 </div>

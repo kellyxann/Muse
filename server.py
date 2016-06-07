@@ -99,7 +99,7 @@ def create_keyword_playlist():
 
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-        data={'name': 'Muse--' + search_term},
+        data={'name': 'Muse--' + search_term.title()},
         format='json')
 
     playlist_id = playlist.data['id']
@@ -141,7 +141,7 @@ def create_location_playlist():
 
     playlist = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists'.format(user_id),
-        data={'name': 'Muse--' + playlist_name.title() },
+        data={'name': 'Muse--' + playlist_name.title()},
         format='json')
 
     playlist_id = playlist.data['id']
