@@ -262,16 +262,6 @@ def get_location_info(longitude, latitude):
 # the response object is inconsistent. so the preceding two 'if statements' look for the existence of a key before attempting to use it
 # the below if statements were how they were previously written.
 
-# usually works for navigation playlist
-    # if data['features'][0]['properties']['address']:
-    #     street_name = data['features'][0]['properties']['address'].split()[1]
-    #     location_list.append(street_name)
-
-# usually works for location playlist
-    # if data['features'][0]['text']:
-    #     street_name = data['features'][0]['text']
-    #     location_list.append(street_name)
-
     return location_list
 
 ##############################################################################
