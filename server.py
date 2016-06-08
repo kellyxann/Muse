@@ -146,13 +146,11 @@ def create_location_playlist():
         format='json')
 
     playlist_id = playlist.data['id']
-    import pdb; pdb.set_trace()
 
     playlist_songs = spotify.post(
         'https://api.spotify.com/v1/users/{}/playlists/{}/tracks'.format(user_id, playlist_id),
         data={'uris': location_track_list},
         format='json')
-    import pdb; pdb.set_trace()
 
     return jsonify({'user_id': user_id, 'playlist_id': playlist_id})
 
@@ -279,8 +277,8 @@ def get_location_info(longitude, latitude):
 ##############################################################################
 
 if __name__ == "__main__":
-    app.debug = True
-    app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-    DebugToolbarExtension(app)
+    app.debug = False
+    # app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+    # DebugToolbarExtension(app)
     # connect_to_db(app)
     app.run()
