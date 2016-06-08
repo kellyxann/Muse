@@ -53,6 +53,16 @@ To create a playlist based upon a journey, A Pirate's Radio sends a query to the
 
 ## <a name="front"></a>Front End
 
+A Pirate's Radio is built on HTML5 and CSS3 with some help from Bootstrap. HTML5's Geolocation function is executed in JavaScript when the user arrives to retrieve their position. The map on the page will respond by dropping a pin on the user's location, and changing the view to be centered around the location pin. If the user chooses to not share their location with the browser, the pin and location will be on Hackbright Academy on Sutter Street in San Francisco. 
+
+When the user enters their word of inspiration into the Pirate's Muse, a post request is sent to the back end to run the Muse function. Jinja returns the playlist id to change the embedded playlist on the page into the one that the user has just created.
+
+When the user clicks the button to build a playlist on their current location, their latitude, longitude and any information that they have entered into the origin field are sent via an AJAX request to generate and display their location playlist on the page.
+
+To create a journey playlist, the user enters their origin and destination, and selects their routing by clicking on a walking, biking, or driving icon. These three values are sent via an AJAX request that returns their journey playlist, and a GEOJSON directions object, which is then rendered by Mapbox, and pins are placed at the start and end of their trip. If the user makes a new playlist for another journey, the pins and route are cleared to display the new route.
+
+All playlists created by A Pirate's Radio are saved to the Spotify account of the logged in user to be enjoyed on their mobile device on their travels.
+
 
 ## <a name="ux"></a>User Experience
 
