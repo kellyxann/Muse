@@ -12,7 +12,10 @@ A Pirate's Radio was built by Kelly Higgins, a former eco-pirate who lived aboar
 ## Table of Contents
 * [Technologies Used](#technologiesused)
 * [APIs Used](#apis)
+* [Back End](#back)
+* [Front End](#front)
 * [User Experience](#ux)
+* [About the Developer](#developer)
 
 ## <a name="technologiesused"></a>Technologies Used
 * Javascript
@@ -25,7 +28,7 @@ A Pirate's Radio was built by Kelly Higgins, a former eco-pirate who lived aboar
 * [PostgreSQL](https://www.postgresql.org/)
 * HTML5
 * CSS3
-* AJAX
+* AJAX/JSON
 
 
 ## <a name="apis"></a>APIs Used
@@ -35,6 +38,20 @@ A Pirate's Radio was built by Kelly Higgins, a former eco-pirate who lived aboar
 * [Mapbox](https://www.mapbox.com/developers)
 * [Mapbox Geocoder](https://www.mapbox.com/geocoding)
 * HTML5 Geolocation
+
+
+## <a name="back"></a>Back End
+
+A Pirate's Radio is a web app written in Python and built on Flask. API keys are stored in a secrets file and sourced from the OS environment. Flask's OAuth library is used to engage with Spotify's API to authenticate user credentials and retrieve an access token for the session via redirecting users to Spotify to log in, and back once authentication is successful. 
+
+Kelly wrote a function called Muse to serve as the base of A Pirate's Radio. It takes a keyword and sends a request to Musixmatch, the largest database of song lyrics on the internet, with thousands of songs being added every day. A request is sent on behalf of the Spotify user to create their new custom playlist. From that response, a playlist ID is returned, and another request is sent to add tracks to the playlist.
+
+The geographic features of A Pirate's Radio use different facets of Mapbox's API. To create a playlist about a location, a query is sent to the Mapbox geocoder for names related to where the user is - street name, neighborhood, city, and state. These place names are then fed to the Pirate's Muse to create a playlist of songs with those names in the lyrics.
+
+To create a playlist based upon a journey, A Pirate's Radio sends a query to the Mapbox API with the origin name, destination name, and the routing method - a walk, bikeride, or drive. From each waypoint along the journey, place names are collected to be given to the Pirate's Muse. Thus, the voyager has a playlist about not just where they are and where they are going, but all the places they'll go along the way.
+
+
+## <a name="front"></a>Front End
 
 
 ## <a name="ux"></a>User Experience
@@ -63,7 +80,7 @@ A Pirate's Radio will generate a playlist based on the names of waypoints on a j
 The Pirate's Muse will allow users to make their own custom playlist based on any search term appearing in the lyrics of songs. 
 
 
+## <a name="developer"></a>About the Developer
 
+Kelly Higgins is a software engineer from Oakland who occassionally misses sailing through Antarctic ice. She hopes you have as much fun with A Pirate's Radio as she had making it.  
 ![kelly](static/screenshots/kelly.jpg)
-"I hope you have as much fun with my app as I had making it!" 
--Kelly, aboard her seafaring home in Antarctica
